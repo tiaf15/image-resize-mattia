@@ -22,7 +22,7 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
 
-    const { masterImage, selectedFormats, mode = "high-quality", cta = null } = await req.json();
+    const { masterImage, selectedFormats, mode = "high-quality", cta = null, ctaColor = null } = await req.json();
     if (!masterImage) throw new Error("Master image is required");
     if (!selectedFormats || !Array.isArray(selectedFormats) || selectedFormats.length === 0) {
       throw new Error("At least one format must be selected");
@@ -30,9 +30,9 @@ serve(async (req) => {
 
     const ctaInstruction = cta 
       ? `\n\nIMPORTANT CTA OVERLAY: Add a clean, modern call-to-action button at the bottom center of the image with the text "${cta}". The button should have:
-- A semi-transparent dark or white background (whichever contrasts better with the image)
+- Background color: ${ctaColor ? `Use ${ctaColor} as the primary button color (this matches the brand colors detected from the image)` : "A semi-transparent dark or white background (whichever contrasts better with the image)"}
 - Rounded corners (pill-shaped)
-- Modern sans-serif typography
+- Modern sans-serif typography in ${ctaColor ? "white or dark text (whichever contrasts better with the button color)" : "contrasting color"}
 - Subtle shadow for depth
 - Positioned in the lower third of the image
 - The button should look professional and not obstruct the main subject.`
@@ -41,7 +41,7 @@ serve(async (req) => {
     const isHighQuality = mode === "high-quality";
     const modelToUse = isHighQuality ? "google/gemini-3-pro-image-preview" : "google/gemini-2.5-flash-image-preview";
 
-    console.log(`Starting format generation (${mode} mode, model: ${modelToUse}, CTA: ${cta || 'none'}) for: ${selectedFormats.join(", ")}`);
+    console.log(`Starting format generation (${mode} mode, model: ${modelToUse}, CTA: ${cta || 'none'}, CTA Color: ${ctaColor || 'auto'}) for: ${selectedFormats.join(", ")}`);
     const formats: Partial<Record<FormatKey, string>> = {};
 
     for (const ratio of selectedFormats as FormatKey[]) {
