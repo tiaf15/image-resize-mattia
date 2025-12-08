@@ -6,7 +6,9 @@ import { Download, Package, RefreshCw, Clock, Shield, Eye } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import SafeZonesOverlay from "./SafeZonesOverlay";
+
 type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
+type ExportFormat = "png" | "jpg" | "webp";
 
 interface GeneratedFormats {
   "1:1"?: string;
@@ -28,13 +30,54 @@ const formatInfo: Record<FormatKey, { size: string; use: string }> = {
   "16:9": { size: "1920×1080", use: "YouTube, LinkedIn, Twitter" },
 };
 
+const exportFormats: { key: ExportFormat; label: string; mime: string }[] = [
+  { key: "png", label: "PNG", mime: "image/png" },
+  { key: "jpg", label: "JPG", mime: "image/jpeg" },
+  { key: "webp", label: "WEBP", mime: "image/webp" },
+];
+
 const EXPIRY_TIME = 3 * 60 * 1000;
+
+async function convertImage(dataUrl: string, targetMime: string, quality = 0.92): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Could not get canvas context"));
+        return;
+      }
+      // Fill white background for JPG (no transparency)
+      if (targetMime === "image/jpeg") {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Failed to convert image"));
+        },
+        targetMime,
+        quality
+      );
+    };
+    img.onerror = () => reject(new Error("Failed to load image"));
+    img.src = dataUrl;
+  });
+}
 
 export default function ResultsSection({ formats, generationTime, onReset }: ResultsSectionProps) {
   const [timeRemaining, setTimeRemaining] = useState<number>(EXPIRY_TIME);
   const [isExpired, setIsExpired] = useState(false);
   const [showSafeZones, setShowSafeZones] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("png");
+
   const validFormats = Object.entries(formats).filter(([, url]) => url) as [FormatKey, string][];
+  const currentExport = exportFormats.find((f) => f.key === exportFormat)!;
 
   useEffect(() => {
     if (!generationTime) return;
@@ -53,24 +96,30 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  const handleDownloadSingle = (format: FormatKey) => {
+  const handleDownloadSingle = async (format: FormatKey) => {
     const url = formats[format];
     if (!url) return;
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `ads-image-${format.replace(":", "x")}.png`;
-    link.click();
+    
+    try {
+      const blob = await convertImage(url, currentExport.mime);
+      saveAs(blob, `ads-image-${format.replace(":", "x")}.${exportFormat}`);
+    } catch (error) {
+      console.error("Download error:", error);
+    }
   };
 
   const handleDownloadAll = async () => {
     const zip = new JSZip();
     for (const [format, dataUrl] of validFormats) {
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-      zip.file(`ads-image-${format.replace(":", "x")}.png`, blob);
+      try {
+        const blob = await convertImage(dataUrl, currentExport.mime);
+        zip.file(`ads-image-${format.replace(":", "x")}.${exportFormat}`, blob);
+      } catch (error) {
+        console.error(`Error converting ${format}:`, error);
+      }
     }
     const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "ads-image-pack.zip");
+    saveAs(content, `ads-image-pack.zip`);
   };
 
   if (isExpired) {
@@ -101,16 +150,38 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
         </div>
       </div>
 
-      <div className="flex items-center gap-3 mb-8 p-4 bg-card rounded-xl border border-border">
-        <Eye className="w-5 h-5 text-muted-foreground" />
-        <Label htmlFor="safe-zones" className="text-sm font-medium cursor-pointer flex-1">
-          Show Safe Zones <span className="text-muted-foreground font-normal">(recommended for ads)</span>
-        </Label>
-        <Switch
-          id="safe-zones"
-          checked={showSafeZones}
-          onCheckedChange={setShowSafeZones}
-        />
+      {/* Export Format & Safe Zones Row */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <div className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border flex-1">
+          <Label className="text-sm font-medium text-foreground whitespace-nowrap">Download as:</Label>
+          <div className="flex rounded-lg border border-border overflow-hidden">
+            {exportFormats.map((format) => (
+              <button
+                key={format.key}
+                onClick={() => setExportFormat(format.key)}
+                className={`px-4 py-1.5 text-sm font-medium transition-colors ${
+                  exportFormat === format.key
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {format.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border flex-1">
+          <Eye className="w-5 h-5 text-muted-foreground" />
+          <Label htmlFor="safe-zones" className="text-sm font-medium cursor-pointer flex-1">
+            Show Safe Zones
+          </Label>
+          <Switch
+            id="safe-zones"
+            checked={showSafeZones}
+            onCheckedChange={setShowSafeZones}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
@@ -128,7 +199,10 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
                 </div>
                 <p className="text-xs text-muted-foreground">{formatInfo[format].use}</p>
               </div>
-              <Button onClick={() => handleDownloadSingle(format)} variant="outline" size="sm"><Download className="w-4 h-4" /></Button>
+              <Button onClick={() => handleDownloadSingle(format)} variant="outline" size="sm">
+                <Download className="w-4 h-4" />
+                <span className="ml-1 uppercase text-xs">{exportFormat}</span>
+              </Button>
             </div>
           </div>
         ))}
