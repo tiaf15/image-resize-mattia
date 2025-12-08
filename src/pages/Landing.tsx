@@ -46,6 +46,9 @@ export default function Landing() {
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
               Pricing
             </Link>
+            <Link to="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
+              Login
+            </Link>
           </nav>
           <Link to="/auth">
             <Button variant="accent" size="sm">
