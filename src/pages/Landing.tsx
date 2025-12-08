@@ -334,21 +334,29 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Try Free CTA Section */}
       <section className="py-20 px-6">
-        <div className="container mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Ready to create your Ads Pack?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Start now, no registration required
-          </p>
-          <Link to="/tool">
-            <Button variant="accent" size="xl">
-              Get Started — It's Free
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </Link>
+        <div className="container mx-auto max-w-4xl">
+          <div className="relative overflow-hidden rounded-3xl gradient-primary p-12 md:p-16 text-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 opacity-50"></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-4">
+                Try AdsImagePack for Free
+              </h2>
+              <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 max-w-xl mx-auto">
+                Create your first Ads Pack in seconds. No credit card required.
+              </p>
+              <Link to="/auth">
+                <Button 
+                  size="xl" 
+                  className="bg-background text-foreground hover:bg-background/90 shadow-lg"
+                >
+                  Start Free Trial
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
