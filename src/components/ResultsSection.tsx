@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Package, RefreshCw, Clock, Shield } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Download, Package, RefreshCw, Clock, Shield, Eye } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-
+import SafeZonesOverlay from "./SafeZonesOverlay";
 type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
 
 interface GeneratedFormats {
@@ -31,7 +33,7 @@ const EXPIRY_TIME = 3 * 60 * 1000;
 export default function ResultsSection({ formats, generationTime, onReset }: ResultsSectionProps) {
   const [timeRemaining, setTimeRemaining] = useState<number>(EXPIRY_TIME);
   const [isExpired, setIsExpired] = useState(false);
-
+  const [showSafeZones, setShowSafeZones] = useState(false);
   const validFormats = Object.entries(formats).filter(([, url]) => url) as [FormatKey, string][];
 
   useEffect(() => {
@@ -88,7 +90,7 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
 
   return (
     <div className="animate-fade-in">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3 bg-primary/10 rounded-full px-4 py-2">
           <Clock className="w-5 h-5 text-primary" />
           <span className="text-sm font-medium text-primary">Time remaining: {formatTime(timeRemaining)}</span>
@@ -99,11 +101,24 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
         </div>
       </div>
 
+      <div className="flex items-center gap-3 mb-8 p-4 bg-card rounded-xl border border-border">
+        <Eye className="w-5 h-5 text-muted-foreground" />
+        <Label htmlFor="safe-zones" className="text-sm font-medium cursor-pointer flex-1">
+          Show Safe Zones <span className="text-muted-foreground font-normal">(recommended for ads)</span>
+        </Label>
+        <Switch
+          id="safe-zones"
+          checked={showSafeZones}
+          onCheckedChange={setShowSafeZones}
+        />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
         {validFormats.map(([format, dataUrl]) => (
           <div key={format} className="bg-card rounded-2xl border border-border overflow-hidden hover-lift">
-            <div className="aspect-square bg-muted flex items-center justify-center p-4">
+            <div className="aspect-square bg-muted flex items-center justify-center p-4 relative">
               <img src={dataUrl} alt={`Format ${format}`} className="max-w-full max-h-full object-contain rounded-lg" />
+              {showSafeZones && <SafeZonesOverlay format={format} />}
             </div>
             <div className="p-4 flex items-center justify-between">
               <div>
