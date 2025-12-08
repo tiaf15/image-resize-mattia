@@ -8,22 +8,19 @@ const corsHeaders = {
 
 type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
 
-const formatConfigs: Record<FormatKey, { size: string; width: number; height: number }> = {
-  "1:1": { size: "1024x1024", width: 1080, height: 1080 },
-  "4:5": { size: "1024x1024", width: 1080, height: 1350 },
-  "9:16": { size: "1024x1536", width: 1080, height: 1920 },
-  "16:9": { size: "1536x1024", width: 1920, height: 1080 },
+const formatConfigs: Record<FormatKey, { width: number; height: number; description: string }> = {
+  "1:1": { width: 1080, height: 1080, description: "square 1:1 aspect ratio" },
+  "4:5": { width: 1080, height: 1350, description: "vertical 4:5 aspect ratio (taller than wide)" },
+  "9:16": { width: 1080, height: 1920, description: "vertical 9:16 aspect ratio (portrait/story format)" },
+  "16:9": { width: 1920, height: 1080, description: "horizontal 16:9 aspect ratio (widescreen landscape)" },
 };
-
-const outpaintingPrompt = (ratio: string) =>
-  `Reframe this image to fit a ${ratio} aspect ratio. Keep the subject, composition, colors, and style exactly identical. Only perform the outpainting or cropping necessary to achieve the new aspect ratio. Do not add new elements or modify the subject.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openAIApiKey) throw new Error("OPENAI_API_KEY not configured");
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
 
     const { masterImage, selectedFormats } = await req.json();
     if (!masterImage) throw new Error("Master image is required");
@@ -42,21 +39,29 @@ serve(async (req) => {
       }
 
       try {
-        console.log(`Generating ${ratio} (${config.size})...`);
-        const base64Data = masterImage.split(",")[1];
-        const binaryData = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
-        const blob = new Blob([binaryData], { type: "image/png" });
+        console.log(`Generating ${ratio} (${config.width}x${config.height})...`);
 
-        const formData = new FormData();
-        formData.append("image", blob, "image.png");
-        formData.append("model", "gpt-image-1");
-        formData.append("prompt", outpaintingPrompt(ratio));
-        formData.append("size", config.size);
+        const prompt = `Reframe and adapt this image to fit a ${config.description} with dimensions ${config.width}x${config.height} pixels. Keep the main subject, colors, style, and mood exactly the same. Only extend or crop the canvas to match the new aspect ratio. Use outpainting to fill any new areas seamlessly while maintaining visual consistency. Do not add new objects or change the subject.`;
 
-        const response = await fetch("https://api.openai.com/v1/images/edits", {
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
-          headers: { "Authorization": `Bearer ${openAIApiKey}` },
-          body: formData,
+          headers: {
+            "Authorization": `Bearer ${lovableApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-image-preview",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: prompt },
+                  { type: "image_url", image_url: { url: masterImage } }
+                ]
+              }
+            ],
+            modalities: ["image", "text"]
+          })
         });
 
         if (!response.ok) {
@@ -66,13 +71,20 @@ serve(async (req) => {
         }
 
         const data = await response.json();
-        formats[ratio] = `data:image/png;base64,${data.data[0].b64_json}`;
-        console.log(`${ratio} done`);
+        const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+        if (generatedImageUrl) {
+          formats[ratio] = generatedImageUrl;
+          console.log(`${ratio} done`);
+        } else {
+          console.error(`No image returned for ${ratio}`);
+        }
       } catch (e) {
         console.error(`Error ${ratio}:`, e);
       }
     }
 
+    console.log(`Generation complete. Formats generated: ${Object.keys(formats).join(", ")}`);
     return new Response(JSON.stringify({ formats }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";
