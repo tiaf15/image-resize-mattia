@@ -24,7 +24,7 @@ const formatInfo = {
   "16:9": { size: "1920×1080", use: "YouTube, LinkedIn, Twitter" },
 };
 
-const EXPIRY_TIME = 3 * 60 * 1000; // 3 minutes in milliseconds
+const EXPIRY_TIME = 3 * 60 * 1000;
 
 export default function ResultsSection({ formats, generationTime, onReset }: ResultsSectionProps) {
   const [timeRemaining, setTimeRemaining] = useState<number>(EXPIRY_TIME);
@@ -32,18 +32,12 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
 
   useEffect(() => {
     if (!generationTime) return;
-
     const interval = setInterval(() => {
       const elapsed = Date.now() - generationTime;
       const remaining = Math.max(0, EXPIRY_TIME - elapsed);
       setTimeRemaining(remaining);
-
-      if (remaining === 0) {
-        setIsExpired(true);
-        clearInterval(interval);
-      }
+      if (remaining === 0) { setIsExpired(true); clearInterval(interval); }
     }, 1000);
-
     return () => clearInterval(interval);
   }, [generationTime]);
 
@@ -62,13 +56,11 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
 
   const handleDownloadAll = async () => {
     const zip = new JSZip();
-
     for (const [format, dataUrl] of Object.entries(formats)) {
       const response = await fetch(dataUrl);
       const blob = await response.blob();
       zip.file(`ads-image-${format.replace(":", "x")}.png`, blob);
     }
-
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, "ads-image-pack.zip");
   };
@@ -79,15 +71,10 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
         <div className="w-20 h-20 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6">
           <Clock className="w-10 h-10 text-muted-foreground" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground mb-3">
-          Sessione scaduta
-        </h2>
-        <p className="text-muted-foreground mb-6">
-          Per la tua privacy, le immagini sono state eliminate automaticamente.
-        </p>
+        <h2 className="text-2xl font-bold text-foreground mb-3">Session Expired</h2>
+        <p className="text-muted-foreground mb-6">For your privacy, images have been automatically deleted.</p>
         <Button onClick={onReset} variant="accent" size="lg">
-          <RefreshCw className="w-5 h-5" />
-          Genera nuovo pack
+          <RefreshCw className="w-5 h-5" /> Generate New Pack
         </Button>
       </div>
     );
@@ -95,75 +82,43 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
 
   return (
     <div className="animate-fade-in">
-      {/* Timer and Actions */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-3 bg-primary/10 rounded-full px-4 py-2">
           <Clock className="w-5 h-5 text-primary" />
-          <span className="text-sm font-medium text-primary">
-            Tempo rimanente: {formatTime(timeRemaining)}
-          </span>
+          <span className="text-sm font-medium text-primary">Time remaining: {formatTime(timeRemaining)}</span>
         </div>
-
         <div className="flex gap-3">
-          <Button onClick={onReset} variant="outline">
-            <RefreshCw className="w-4 h-4" />
-            Nuovo Pack
-          </Button>
-          <Button onClick={handleDownloadAll} variant="accent">
-            <Package className="w-4 h-4" />
-            Scarica tutto in ZIP
-          </Button>
+          <Button onClick={onReset} variant="outline"><RefreshCw className="w-4 h-4" /> New Pack</Button>
+          <Button onClick={handleDownloadAll} variant="accent"><Package className="w-4 h-4" /> Download All as ZIP</Button>
         </div>
       </div>
 
-      {/* Results Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
         {(Object.entries(formats) as [keyof GeneratedFormats, string][]).map(([format, dataUrl]) => (
-          <div
-            key={format}
-            className="bg-card rounded-2xl border border-border overflow-hidden hover-lift"
-          >
+          <div key={format} className="bg-card rounded-2xl border border-border overflow-hidden hover-lift">
             <div className="aspect-square bg-muted flex items-center justify-center p-4">
-              <img
-                src={dataUrl}
-                alt={`Format ${format}`}
-                className="max-w-full max-h-full object-contain rounded-lg"
-              />
+              <img src={dataUrl} alt={`Format ${format}`} className="max-w-full max-h-full object-contain rounded-lg" />
             </div>
             <div className="p-4 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded">
-                    {format}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatInfo[format].size}
-                  </span>
+                  <span className="text-sm font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded">{format}</span>
+                  <span className="text-sm text-muted-foreground">{formatInfo[format].size}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {formatInfo[format].use}
-                </p>
+                <p className="text-xs text-muted-foreground">{formatInfo[format].use}</p>
               </div>
-              <Button
-                onClick={() => handleDownloadSingle(format)}
-                variant="outline"
-                size="sm"
-              >
-                <Download className="w-4 h-4" />
-              </Button>
+              <Button onClick={() => handleDownloadSingle(format)} variant="outline" size="sm"><Download className="w-4 h-4" /></Button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Privacy Notice */}
       <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-4">
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Shield className="w-5 h-5 text-primary" />
         </div>
         <p className="text-sm text-muted-foreground">
-          Le immagini verranno eliminate automaticamente tra {formatTime(timeRemaining)}. 
-          Scarica il pack prima della scadenza.
+          Images will be automatically deleted in {formatTime(timeRemaining)}. Download the pack before expiration.
         </p>
       </div>
     </div>

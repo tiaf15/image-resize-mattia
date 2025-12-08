@@ -5,15 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Upload, 
-  Sparkles, 
-  ArrowLeft, 
-  Layers, 
-  ImageIcon,
-  Loader2,
-  X
-} from "lucide-react";
+import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X } from "lucide-react";
 import ResultsSection from "@/components/ResultsSection";
 
 interface GeneratedFormats {
@@ -61,37 +53,22 @@ export default function Tool() {
 
   const handleGenerateMaster = async () => {
     if (!prompt.trim()) {
-      toast({
-        title: "Prompt richiesto",
-        description: "Inserisci una descrizione per generare l'immagine",
-        variant: "destructive",
-      });
+      toast({ title: "Prompt required", description: "Enter a description to generate the image", variant: "destructive" });
       return;
     }
 
     setIsGeneratingMaster(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-master", {
-        body: { prompt },
-      });
-
+      const { data, error } = await supabase.functions.invoke("generate-master", { body: { prompt } });
       if (error) throw error;
-
       if (data?.image) {
         setMasterImage(data.image);
         setUploadedImage(null);
-        toast({
-          title: "Immagine generata!",
-          description: "Ora puoi generare il pack per tutti i formati",
-        });
+        toast({ title: "Image generated!", description: "Now you can generate the pack for all formats" });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error generating master:", error);
-      toast({
-        title: "Errore nella generazione",
-        description: error.message || "Si è verificato un errore",
-        variant: "destructive",
-      });
+      toast({ title: "Generation error", description: error instanceof Error ? error.message : "An error occurred", variant: "destructive" });
     } finally {
       setIsGeneratingMaster(false);
     }
@@ -99,11 +76,7 @@ export default function Tool() {
 
   const handleGenerateFormats = async () => {
     if (!masterImage) {
-      toast({
-        title: "Immagine richiesta",
-        description: "Carica o genera un'immagine prima di procedere",
-        variant: "destructive",
-      });
+      toast({ title: "Image required", description: "Upload or generate an image before proceeding", variant: "destructive" });
       return;
     }
 
@@ -111,26 +84,15 @@ export default function Tool() {
     setGenerationTime(Date.now());
 
     try {
-      const { data, error } = await supabase.functions.invoke("generate-formats", {
-        body: { masterImage },
-      });
-
+      const { data, error } = await supabase.functions.invoke("generate-formats", { body: { masterImage } });
       if (error) throw error;
-
       if (data?.formats) {
         setGeneratedFormats(data.formats);
-        toast({
-          title: "Ads Pack generato!",
-          description: "Tutte le varianti sono pronte per il download",
-        });
+        toast({ title: "Ads Pack generated!", description: "All variants are ready for download" });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error generating formats:", error);
-      toast({
-        title: "Errore nella generazione",
-        description: error.message || "Si è verificato un errore",
-        variant: "destructive",
-      });
+      toast({ title: "Generation error", description: error instanceof Error ? error.message : "An error occurred", variant: "destructive" });
     } finally {
       setIsGeneratingFormats(false);
     }
@@ -146,7 +108,6 @@ export default function Tool() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
@@ -158,36 +119,30 @@ export default function Tool() {
           <Link to="/">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4" />
-              Torna alla Home
+              Back to Home
             </Button>
           </Link>
         </div>
       </header>
 
       <main className="container mx-auto px-6 py-12 max-w-5xl">
-        {/* Title */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-            Genera il tuo Ads Pack
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Carica un'immagine o generala con AI, poi ottieni tutti i formati
-          </p>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Generate Your Ads Pack</h1>
+          <p className="text-muted-foreground text-lg">Upload an image or generate one with AI, then get all formats</p>
         </div>
 
         {!generatedFormats ? (
           <>
-            {/* Tabs Section */}
             <div className="bg-card rounded-2xl border border-border p-6 md:p-8 mb-8">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-8">
                   <TabsTrigger value="upload" className="gap-2">
                     <Upload className="w-4 h-4" />
-                    Carica Immagine
+                    Upload Image
                   </TabsTrigger>
                   <TabsTrigger value="generate" className="gap-2">
                     <Sparkles className="w-4 h-4" />
-                    Genera con AI
+                    Generate with AI
                   </TabsTrigger>
                 </TabsList>
 
@@ -198,26 +153,12 @@ export default function Tool() {
                     className="border-2 border-dashed border-border rounded-xl p-12 text-center hover:border-primary/50 transition-colors cursor-pointer relative"
                     onClick={() => document.getElementById("file-input")?.click()}
                   >
-                    <input
-                      id="file-input"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileInput}
-                      className="hidden"
-                    />
+                    <input id="file-input" type="file" accept="image/*" onChange={handleFileInput} className="hidden" />
                     {uploadedImage ? (
                       <div className="relative inline-block">
-                        <img
-                          src={uploadedImage}
-                          alt="Uploaded"
-                          className="max-h-64 rounded-lg mx-auto"
-                        />
+                        <img src={uploadedImage} alt="Uploaded" className="max-h-64 rounded-lg mx-auto" />
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setUploadedImage(null);
-                            setMasterImage(null);
-                          }}
+                          onClick={(e) => { e.stopPropagation(); setUploadedImage(null); setMasterImage(null); }}
                           className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90"
                         >
                           <X className="w-4 h-4" />
@@ -228,12 +169,8 @@ export default function Tool() {
                         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                           <ImageIcon className="w-8 h-8 text-primary" />
                         </div>
-                        <p className="text-foreground font-medium mb-2">
-                          Trascina qui la tua immagine
-                        </p>
-                        <p className="text-muted-foreground text-sm">
-                          oppure clicca per selezionare un file
-                        </p>
+                        <p className="text-foreground font-medium mb-2">Drag and drop your image here</p>
+                        <p className="text-muted-foreground text-sm">or click to select a file</p>
                       </>
                     )}
                   </div>
@@ -241,39 +178,24 @@ export default function Tool() {
 
                 <TabsContent value="generate" className="mt-0 space-y-4">
                   <Textarea
-                    placeholder="Descrivi l'immagine che vuoi generare... Es: 'Un moderno ufficio con piante verdi e luce naturale, stile minimalista'"
+                    placeholder="Describe the image you want to generate... E.g., 'A modern office with green plants and natural light, minimalist style'"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     className="min-h-32 resize-none"
                   />
-                  <Button
-                    onClick={handleGenerateMaster}
-                    disabled={isGeneratingMaster || !prompt.trim()}
-                    className="w-full"
-                    variant="premium"
-                  >
+                  <Button onClick={handleGenerateMaster} disabled={isGeneratingMaster || !prompt.trim()} className="w-full" variant="premium">
                     {isGeneratingMaster ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Generazione in corso...
-                      </>
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
                     ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        Genera Immagine Master
-                      </>
+                      <><Sparkles className="w-4 h-4" /> Generate Master Image</>
                     )}
                   </Button>
 
                   {masterImage && !uploadedImage && (
                     <div className="mt-6 text-center">
-                      <p className="text-sm text-muted-foreground mb-3">Immagine generata:</p>
+                      <p className="text-sm text-muted-foreground mb-3">Generated image:</p>
                       <div className="relative inline-block">
-                        <img
-                          src={masterImage}
-                          alt="Generated"
-                          className="max-h-64 rounded-lg mx-auto"
-                        />
+                        <img src={masterImage} alt="Generated" className="max-h-64 rounded-lg mx-auto" />
                         <button
                           onClick={() => setMasterImage(null)}
                           className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90"
@@ -287,47 +209,24 @@ export default function Tool() {
               </Tabs>
             </div>
 
-            {/* Generate Pack Button */}
             <div className="text-center">
-              <Button
-                onClick={handleGenerateFormats}
-                disabled={!masterImage || isGeneratingFormats}
-                variant="accent"
-                size="xl"
-                className="min-w-64"
-              >
+              <Button onClick={handleGenerateFormats} disabled={!masterImage || isGeneratingFormats} variant="accent" size="xl" className="min-w-64">
                 {isGeneratingFormats ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Generazione Pack in corso...
-                  </>
+                  <><Loader2 className="w-5 h-5 animate-spin" /> Generating Pack...</>
                 ) : (
-                  <>
-                    <Layers className="w-5 h-5" />
-                    Genera Ads Pack
-                  </>
+                  <><Layers className="w-5 h-5" /> Generate Ads Pack</>
                 )}
               </Button>
-              {!masterImage && (
-                <p className="text-sm text-muted-foreground mt-3">
-                  Carica o genera un'immagine per procedere
-                </p>
-              )}
+              {!masterImage && <p className="text-sm text-muted-foreground mt-3">Upload or generate an image to proceed</p>}
             </div>
           </>
         ) : (
-          <ResultsSection
-            formats={generatedFormats}
-            generationTime={generationTime}
-            onReset={handleClear}
-          />
+          <ResultsSection formats={generatedFormats} generationTime={generationTime} onReset={handleClear} />
         )}
 
-        {/* Privacy Banner */}
         <div className="mt-12 bg-primary/5 rounded-xl p-4 text-center">
           <p className="text-sm text-muted-foreground">
-            🔒 Per la tua privacy, nessuna immagine viene salvata sui nostri server. 
-            Tutte le immagini vengono eliminate automaticamente dopo l'elaborazione.
+            🔒 For your privacy, no images are stored on our servers. All images are automatically deleted after processing.
           </p>
         </div>
       </main>

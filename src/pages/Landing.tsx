@@ -12,18 +12,18 @@ const formats = [
 const steps = [
   {
     icon: Upload,
-    title: "Carica o Genera",
-    description: "Carica la tua immagine o generala con AI tramite un prompt testuale",
+    title: "Upload or Generate",
+    description: "Upload your image or generate one with AI using a text prompt",
   },
   {
     icon: Sparkles,
     title: "AI Processing",
-    description: "La nostra AI adatta l'immagine a tutti i formati pubblicitari con outpainting intelligente",
+    description: "Our AI adapts your image to all ad formats using intelligent outpainting",
   },
   {
     icon: Download,
-    title: "Scarica il Pack",
-    description: "Ottieni tutte le varianti in un click, pronte per le tue campagne",
+    title: "Download Pack",
+    description: "Get all variants in one click, ready for your campaigns",
   },
 ];
 
@@ -41,7 +41,7 @@ export default function Landing() {
           </div>
           <Link to="/tool">
             <Button variant="accent" size="sm">
-              Inizia Ora
+              Get Started
               <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
@@ -57,26 +57,26 @@ export default function Landing() {
           </div>
           
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            Un'immagine,{" "}
-            <span className="text-primary">tutti i formati</span>{" "}
-            per le tue Ads
+            One image,{" "}
+            <span className="text-primary">every format</span>{" "}
+            for your Ads
           </h1>
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            Genera automaticamente versioni ottimizzate per ogni piattaforma social. 
-            Carica o crea con AI, scarica il pack completo in un click.
+            Automatically generate optimized versions for every social platform. 
+            Upload or create with AI, download the complete pack in one click.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
             <Link to="/tool">
               <Button variant="accent" size="xl" className="w-full sm:w-auto">
-                Genera il tuo Ads Pack
+                Generate Your Ads Pack
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
             <a href="#how-it-works">
               <Button variant="outline" size="xl" className="w-full sm:w-auto">
-                Come funziona
+                How It Works
               </Button>
             </a>
           </div>
@@ -88,10 +88,10 @@ export default function Landing() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Formati Supportati
+              Supported Formats
             </h2>
             <p className="text-muted-foreground text-lg">
-              Tutti i formati necessari per le tue campagne pubblicitarie
+              All the formats you need for your advertising campaigns
             </p>
           </div>
           
@@ -118,10 +118,10 @@ export default function Landing() {
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Come Funziona
+              How It Works
             </h2>
             <p className="text-muted-foreground text-lg">
-              Tre semplici step per ottenere il tuo Ads Pack
+              Three simple steps to get your Ads Pack
             </p>
           </div>
           
@@ -158,8 +158,8 @@ export default function Landing() {
                 Privacy by Design
               </h3>
               <p className="text-muted-foreground">
-                Per la tua privacy, nessuna immagine viene salvata sui nostri server. 
-                Tutte le immagini vengono elaborate in tempo reale e eliminate automaticamente dopo il download.
+                For your privacy, no images are stored on our servers. 
+                All images are processed in real-time and automatically deleted after download.
               </p>
             </div>
           </div>
@@ -170,14 +170,14 @@ export default function Landing() {
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-3xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Pronto a creare il tuo Ads Pack?
+            Ready to create your Ads Pack?
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Inizia subito, nessuna registrazione richiesta
+            Start now, no registration required
           </p>
           <Link to="/tool">
             <Button variant="accent" size="xl">
-              Inizia Ora — È Gratis
+              Get Started — It's Free
               <ArrowRight className="w-5 h-5" />
             </Button>
           </Link>
@@ -194,7 +194,7 @@ export default function Landing() {
             <span className="font-semibold text-foreground">AdsImagePack</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2025 AdsImagePack. Tutti i diritti riservati.
+            © 2025 AdsImagePack. All rights reserved.
           </p>
         </div>
       </footer>
