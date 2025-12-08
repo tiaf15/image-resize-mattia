@@ -4,11 +4,13 @@ import { Download, Package, RefreshCw, Clock, Shield } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
+type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
+
 interface GeneratedFormats {
-  "1:1": string;
-  "4:5": string;
-  "9:16": string;
-  "16:9": string;
+  "1:1"?: string;
+  "4:5"?: string;
+  "9:16"?: string;
+  "16:9"?: string;
 }
 
 interface ResultsSectionProps {
@@ -17,7 +19,7 @@ interface ResultsSectionProps {
   onReset: () => void;
 }
 
-const formatInfo = {
+const formatInfo: Record<FormatKey, { size: string; use: string }> = {
   "1:1": { size: "1080×1080", use: "Instagram Post, Facebook" },
   "4:5": { size: "1080×1350", use: "Instagram Feed" },
   "9:16": { size: "1080×1920", use: "Stories, Reels, TikTok" },
@@ -29,6 +31,8 @@ const EXPIRY_TIME = 3 * 60 * 1000;
 export default function ResultsSection({ formats, generationTime, onReset }: ResultsSectionProps) {
   const [timeRemaining, setTimeRemaining] = useState<number>(EXPIRY_TIME);
   const [isExpired, setIsExpired] = useState(false);
+
+  const validFormats = Object.entries(formats).filter(([, url]) => url) as [FormatKey, string][];
 
   useEffect(() => {
     if (!generationTime) return;
@@ -47,16 +51,18 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  const handleDownloadSingle = (format: keyof GeneratedFormats) => {
+  const handleDownloadSingle = (format: FormatKey) => {
+    const url = formats[format];
+    if (!url) return;
     const link = document.createElement("a");
-    link.href = formats[format];
+    link.href = url;
     link.download = `ads-image-${format.replace(":", "x")}.png`;
     link.click();
   };
 
   const handleDownloadAll = async () => {
     const zip = new JSZip();
-    for (const [format, dataUrl] of Object.entries(formats)) {
+    for (const [format, dataUrl] of validFormats) {
       const response = await fetch(dataUrl);
       const blob = await response.blob();
       zip.file(`ads-image-${format.replace(":", "x")}.png`, blob);
@@ -94,7 +100,7 @@ export default function ResultsSection({ formats, generationTime, onReset }: Res
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-        {(Object.entries(formats) as [keyof GeneratedFormats, string][]).map(([format, dataUrl]) => (
+        {validFormats.map(([format, dataUrl]) => (
           <div key={format} className="bg-card rounded-2xl border border-border overflow-hidden hover-lift">
             <div className="aspect-square bg-muted flex items-center justify-center p-4">
               <img src={dataUrl} alt={`Format ${format}`} className="max-w-full max-h-full object-contain rounded-lg" />

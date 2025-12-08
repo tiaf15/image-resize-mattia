@@ -3,17 +3,27 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X } from "lucide-react";
 import ResultsSection from "@/components/ResultsSection";
 
+type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
+
 interface GeneratedFormats {
-  "1:1": string;
-  "4:5": string;
-  "9:16": string;
-  "16:9": string;
+  "1:1"?: string;
+  "4:5"?: string;
+  "9:16"?: string;
+  "16:9"?: string;
 }
+
+const availableFormats: { key: FormatKey; label: string; size: string; use: string }[] = [
+  { key: "1:1", label: "1:1", size: "1080×1080", use: "Instagram Post, Facebook" },
+  { key: "4:5", label: "4:5", size: "1080×1350", use: "Instagram Feed" },
+  { key: "9:16", label: "9:16", size: "1080×1920", use: "Stories, Reels, TikTok" },
+  { key: "16:9", label: "16:9", size: "1920×1080", use: "YouTube, LinkedIn, Twitter" },
+];
 
 export default function Tool() {
   const [activeTab, setActiveTab] = useState("upload");
@@ -24,7 +34,14 @@ export default function Tool() {
   const [masterImage, setMasterImage] = useState<string | null>(null);
   const [generatedFormats, setGeneratedFormats] = useState<GeneratedFormats | null>(null);
   const [generationTime, setGenerationTime] = useState<number | null>(null);
+  const [selectedFormats, setSelectedFormats] = useState<FormatKey[]>([]);
   const { toast } = useToast();
+
+  const handleFormatToggle = (format: FormatKey) => {
+    setSelectedFormats((prev) =>
+      prev.includes(format) ? prev.filter((f) => f !== format) : [...prev, format]
+    );
+  };
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -80,15 +97,22 @@ export default function Tool() {
       return;
     }
 
+    if (selectedFormats.length === 0) {
+      toast({ title: "No formats selected", description: "Please select at least one format to generate", variant: "destructive" });
+      return;
+    }
+
     setIsGeneratingFormats(true);
     setGenerationTime(Date.now());
 
     try {
-      const { data, error } = await supabase.functions.invoke("generate-formats", { body: { masterImage } });
+      const { data, error } = await supabase.functions.invoke("generate-formats", {
+        body: { masterImage, selectedFormats },
+      });
       if (error) throw error;
       if (data?.formats) {
         setGeneratedFormats(data.formats);
-        toast({ title: "Ads Pack generated!", description: "All variants are ready for download" });
+        toast({ title: "Ads Pack generated!", description: `${Object.keys(data.formats).length} format(s) ready for download` });
       }
     } catch (error: unknown) {
       console.error("Error generating formats:", error);
@@ -104,6 +128,7 @@ export default function Tool() {
     setGeneratedFormats(null);
     setPrompt("");
     setGenerationTime(null);
+    setSelectedFormats([]);
   };
 
   return (
@@ -209,12 +234,51 @@ export default function Tool() {
               </Tabs>
             </div>
 
+            {/* Format Selection */}
+            <div className="bg-card rounded-2xl border border-border p-6 md:p-8 mb-8">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Select Formats to Generate</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {availableFormats.map((format) => (
+                  <label
+                    key={format.key}
+                    className={`flex items-start gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
+                      selectedFormats.includes(format.key)
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <Checkbox
+                      checked={selectedFormats.includes(format.key)}
+                      onCheckedChange={() => handleFormatToggle(format.key)}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-foreground">{format.label}</span>
+                        <span className="text-sm text-muted-foreground">({format.size})</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{format.use}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              {selectedFormats.length === 0 && (
+                <p className="text-sm text-muted-foreground mt-4 text-center">Select at least one format to generate</p>
+              )}
+            </div>
+
             <div className="text-center">
-              <Button onClick={handleGenerateFormats} disabled={!masterImage || isGeneratingFormats} variant="accent" size="xl" className="min-w-64">
+              <Button
+                onClick={handleGenerateFormats}
+                disabled={!masterImage || isGeneratingFormats || selectedFormats.length === 0}
+                variant="accent"
+                size="xl"
+                className="min-w-64"
+              >
                 {isGeneratingFormats ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> Generating Pack...</>
                 ) : (
-                  <><Layers className="w-5 h-5" /> Generate Ads Pack</>
+                  <><Layers className="w-5 h-5" /> Generate Ads Pack ({selectedFormats.length})</>
                 )}
               </Button>
               {!masterImage && <p className="text-sm text-muted-foreground mt-3">Upload or generate an image to proceed</p>}
