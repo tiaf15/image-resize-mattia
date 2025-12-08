@@ -95,20 +95,36 @@ export default function Landing() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {formats.map((format, index) => (
-              <div
-                key={format.ratio}
-                className="bg-card rounded-2xl p-6 border border-border hover-lift animate-fade-up"
-                style={{ animationDelay: `${0.1 * index}s` }}
-              >
-                <div className="w-full aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-4 flex items-center justify-center">
-                  <span className="text-4xl font-bold text-primary">{format.ratio}</span>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+            {formats.map((format, index) => {
+              const [w, h] = format.ratio.split(":").map(Number);
+              const aspectRatio = w / h;
+              
+              return (
+                <div
+                  key={format.ratio}
+                  className="bg-card rounded-2xl p-6 border border-border hover-lift animate-fade-up flex flex-col"
+                  style={{ animationDelay: `${0.1 * index}s` }}
+                >
+                  <div className="h-40 flex items-end justify-center mb-4">
+                    <div 
+                      className="bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center border border-primary/30"
+                      style={{ 
+                        aspectRatio: `${w}/${h}`,
+                        height: aspectRatio >= 1 ? `${100 / aspectRatio}%` : '100%',
+                        width: aspectRatio < 1 ? `${100 * aspectRatio}%` : '100%',
+                        maxHeight: '100%',
+                        maxWidth: '100%'
+                      }}
+                    >
+                      <span className="text-2xl font-bold text-primary">{format.ratio}</span>
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-foreground text-lg mb-1">{format.size}</h3>
+                  <p className="text-sm text-muted-foreground">{format.use}</p>
                 </div>
-                <h3 className="font-semibold text-foreground text-lg mb-1">{format.size}</h3>
-                <p className="text-sm text-muted-foreground">{format.use}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
