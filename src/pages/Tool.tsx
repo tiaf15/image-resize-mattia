@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X, Zap, Crown, Type } from "lucide-react";
+import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X, Zap, Crown, Type, Palette } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -43,6 +43,16 @@ const ctaOptions = [
   { value: "book-now", label: "Book Now" },
 ];
 
+type AdsStyleKey = "clean-frame" | "soft-gradient" | "promo-badge" | "highlight-glow" | "minimal-shadow";
+
+const adsStyleOptions: { key: AdsStyleKey; label: string; description: string }[] = [
+  { key: "clean-frame", label: "Clean Frame", description: "Subtle white or dark border with rounded corners" },
+  { key: "soft-gradient", label: "Soft Gradient", description: "Gentle color gradient overlay at edges" },
+  { key: "promo-badge", label: "Promo Badge", description: "Corner badge with SALE or NEW label" },
+  { key: "highlight-glow", label: "Highlight Glow", description: "Soft glow effect around the subject" },
+  { key: "minimal-shadow", label: "Minimal Shadow", description: "Elegant drop shadow at bottom" },
+];
+
 export default function Tool() {
   const [activeTab, setActiveTab] = useState("upload");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -57,6 +67,8 @@ export default function Tool() {
   const [ctaEnabled, setCtaEnabled] = useState(false);
   const [ctaLabel, setCtaLabel] = useState("shop-now");
   const [detectedColor, setDetectedColor] = useState<string | null>(null);
+  const [adsStyleEnabled, setAdsStyleEnabled] = useState(false);
+  const [selectedAdsStyle, setSelectedAdsStyle] = useState<AdsStyleKey>("clean-frame");
   const { toast } = useToast();
   const { history, addEntry, clearHistory } = useLocalHistory();
 
@@ -146,8 +158,9 @@ export default function Tool() {
     try {
       const ctaText = ctaEnabled ? ctaOptions.find(o => o.value === ctaLabel)?.label : null;
       const ctaColor = ctaEnabled && detectedColor ? detectedColor : null;
+      const adsStyle = adsStyleEnabled ? selectedAdsStyle : null;
       const { data, error } = await supabase.functions.invoke("generate-formats", {
-        body: { masterImage, selectedFormats, mode: generationMode, cta: ctaText, ctaColor },
+        body: { masterImage, selectedFormats, mode: generationMode, cta: ctaText, ctaColor, adsStyle },
       });
       if (error) throw error;
       if (data?.formats) {
@@ -175,6 +188,8 @@ export default function Tool() {
     setSelectedFormats([]);
     setCtaEnabled(false);
     setCtaLabel("shop-now");
+    setAdsStyleEnabled(false);
+    setSelectedAdsStyle("clean-frame");
   };
 
   const handleHistorySelect = (entry: HistoryEntry) => {
@@ -414,7 +429,54 @@ export default function Tool() {
                     <p className="text-xs text-muted-foreground">
                       CTA color will adapt automatically to your image.
                     </p>
+            </div>
+
+            {/* Ads Style Option */}
+            <div className="bg-card rounded-2xl border border-border p-6 md:p-8 mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <Palette className="w-5 h-5 text-accent" />
                   </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">Ads Style (optional)</h2>
+                    <p className="text-sm text-muted-foreground">Apply a visual enhancement template</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={adsStyleEnabled}
+                  onCheckedChange={setAdsStyleEnabled}
+                  aria-label="Enable ads style"
+                />
+              </div>
+              
+              {adsStyleEnabled && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <Label className="text-sm font-medium text-foreground mb-3 block">
+                    Choose a Style
+                  </Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {adsStyleOptions.map((style) => (
+                      <button
+                        key={style.key}
+                        onClick={() => setSelectedAdsStyle(style.key)}
+                        className={`p-3 rounded-xl border text-left transition-all ${
+                          selectedAdsStyle === style.key
+                            ? "border-accent bg-accent/5 ring-2 ring-accent/20"
+                            : "border-border hover:border-accent/50"
+                        }`}
+                      >
+                        <span className="font-medium text-foreground text-sm block mb-1">{style.label}</span>
+                        <p className="text-xs text-muted-foreground">{style.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    The selected style will be applied consistently across all generated formats.
+                  </p>
+                </div>
+              )}
+            </div>
                 </div>
               )}
             </div>
