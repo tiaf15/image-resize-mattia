@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/accordion";
 
 // Demo images - same image adapted to different formats
-import demo1x1 from "@/assets/demo-1x1.png";
-import demo4x5 from "@/assets/demo-4x5.png";
-import demo9x16 from "@/assets/demo-9x16.png";
-import demo16x9 from "@/assets/demo-16x9.png";
+import demo1x1 from "@/assets/demo-1x1.jpg";
+import demo4x5 from "@/assets/demo-4x5.jpg";
+import demo9x16 from "@/assets/demo-9x16.jpg";
+import demo16x9 from "@/assets/demo-16x9.jpg";
 
 const formats = [
   { ratio: "1:1", size: "1080×1080", use: "Instagram Post, Facebook" },
