@@ -7,6 +7,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
+// Example images
+import exampleOriginal from "@/assets/example-original.png";
+import example1x1 from "@/assets/example-1x1.png";
+import example4x5 from "@/assets/example-4x5.png";
+import example9x16 from "@/assets/example-9x16.png";
+import example16x9 from "@/assets/example-16x9.png";
 const formats = [
   { ratio: "1:1", size: "1080×1080", use: "Instagram Post, Facebook" },
   { ratio: "4:5", size: "1080×1350", use: "Instagram Feed" },
@@ -272,11 +279,12 @@ export default function Landing() {
             <div className="flex flex-col lg:flex-row items-center gap-8">
               {/* Original Image */}
               <div className="flex-shrink-0 text-center">
-                <div className="w-48 h-48 rounded-xl bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10 border-2 border-primary/40 flex items-center justify-center mb-3 mx-auto overflow-hidden">
-                  <div className="text-center">
-                    <Upload className="w-10 h-10 text-primary mx-auto mb-2" />
-                    <span className="text-sm text-muted-foreground">Original</span>
-                  </div>
+                <div className="w-48 h-48 rounded-xl border-2 border-primary/40 mb-3 mx-auto overflow-hidden shadow-lg">
+                  <img 
+                    src={exampleOriginal} 
+                    alt="Original input image" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <p className="text-sm font-medium text-foreground">Input Image</p>
                 <p className="text-xs text-muted-foreground">Any size</p>
@@ -295,19 +303,23 @@ export default function Landing() {
               </div>
 
               {/* Output Formats */}
-              <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-6 items-end">
                 {[
-                  { ratio: "1:1", size: "1080×1080", w: 80, h: 80 },
-                  { ratio: "4:5", size: "1080×1350", w: 64, h: 80 },
-                  { ratio: "9:16", size: "1080×1920", w: 45, h: 80 },
-                  { ratio: "16:9", size: "1920×1080", w: 100, h: 56 },
+                  { ratio: "1:1", size: "1080×1080", w: 100, h: 100, img: example1x1 },
+                  { ratio: "4:5", size: "1080×1350", w: 80, h: 100, img: example4x5 },
+                  { ratio: "9:16", size: "1080×1920", w: 56, h: 100, img: example9x16 },
+                  { ratio: "16:9", size: "1920×1080", w: 120, h: 68, img: example16x9 },
                 ].map((format) => (
                   <div key={format.ratio} className="text-center">
                     <div 
-                      className="rounded-lg bg-gradient-to-br from-primary/20 via-accent/15 to-primary/25 border border-primary/30 flex items-center justify-center mx-auto mb-2"
+                      className="rounded-lg border border-primary/30 mx-auto mb-2 overflow-hidden shadow-md"
                       style={{ width: `${format.w}px`, height: `${format.h}px` }}
                     >
-                      <span className="text-xs font-bold text-primary">{format.ratio}</span>
+                      <img 
+                        src={format.img} 
+                        alt={`${format.ratio} format example`}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <p className="text-sm font-medium text-foreground">{format.ratio}</p>
                     <p className="text-xs text-muted-foreground">{format.size}</p>
@@ -331,8 +343,12 @@ export default function Landing() {
             <div className="flex flex-col md:flex-row items-center justify-center gap-8">
               {/* Without CTA */}
               <div className="text-center">
-                <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-primary/20 via-accent/15 to-primary/25 border border-border flex items-center justify-center mb-3 mx-auto relative overflow-hidden">
-                  <span className="text-sm text-muted-foreground">Image</span>
+                <div className="w-40 h-40 rounded-xl border border-border mb-3 mx-auto relative overflow-hidden shadow-md">
+                  <img 
+                    src={example1x1} 
+                    alt="Image without CTA" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <p className="text-sm text-muted-foreground">Without CTA</p>
               </div>
@@ -342,9 +358,16 @@ export default function Landing() {
 
               {/* With CTA */}
               <div className="text-center">
-                <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-primary/20 via-accent/15 to-primary/25 border-2 border-primary/40 flex items-end justify-center mb-3 mx-auto relative overflow-hidden p-3">
-                  <div className="w-full py-2 px-3 rounded-lg bg-accent text-accent-foreground text-xs font-semibold text-center shadow-lg">
-                    Shop Now →
+                <div className="w-40 h-40 rounded-xl border-2 border-primary/40 mb-3 mx-auto relative overflow-hidden shadow-lg">
+                  <img 
+                    src={example1x1} 
+                    alt="Image with CTA overlay" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <div className="w-full py-2 px-3 rounded-lg bg-accent text-accent-foreground text-xs font-semibold text-center shadow-lg">
+                      Shop Now →
+                    </div>
                   </div>
                 </div>
                 <p className="text-sm font-medium text-foreground">With CTA Overlay</p>
