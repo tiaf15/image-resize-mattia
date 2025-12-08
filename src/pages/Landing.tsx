@@ -1,7 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Upload, Sparkles, Download, Shield, Zap, Layers, Crown, Building2, Check } from "lucide-react";
-
+import { ArrowRight, Upload, Sparkles, Download, Shield, Zap, Layers, Crown, Building2, Check, ChevronDown } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 const formats = [
   { ratio: "1:1", size: "1080×1080", use: "Instagram Post, Facebook" },
   { ratio: "4:5", size: "1080×1350", use: "Instagram Feed" },
@@ -530,6 +535,94 @@ export default function Landing() {
               </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 px-6 bg-secondary/30">
+        <div className="container mx-auto max-w-3xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Everything you need to know about AdsImagePack
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-4">
+            <AccordionItem value="item-1" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline">
+                Do you store my images?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                No. Your privacy is our priority. All images are processed in real-time and automatically deleted after you download your Ads Pack. We never store your images on our servers.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline">
+                What formats can I generate?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                We support the four most popular ad formats: 1:1 (1080×1080) for Instagram and Facebook posts, 4:5 (1080×1350) for Instagram Feed, 9:16 (1080×1920) for Stories, Reels, and TikTok, and 16:9 (1920×1080) for YouTube, LinkedIn, and Twitter.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline">
+                Can I use these images for paid advertising?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Absolutely! All images generated with AdsImagePack are yours to use for any commercial purpose, including paid advertising campaigns on any platform.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline">
+                Does the AI change my image?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                The AI uses intelligent outpainting to extend your image to fit different aspect ratios. Your original image remains intact at the center, while the AI seamlessly generates matching content around it to fill the new dimensions.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-5" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline">
+                How fast is the generation process?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Most Ads Packs are generated in under 30 seconds. The exact time depends on server load and image complexity, but we optimize for speed so you can iterate quickly on your campaigns.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-6" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline">
+                What's included in Free vs Pro plan?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                The Free plan includes 10 Ads Packs per month with PNG export. Pro unlocks 150 Ads Packs, all export formats (PNG, JPG, WebP), CTA overlays, custom styles, and safe zone previews. Check our pricing page for full details.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-7" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline">
+                Can I cancel anytime?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Yes! All our plans are month-to-month with no long-term commitment. You can cancel anytime from your account settings, and you'll retain access until the end of your billing period.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-8" className="bg-card rounded-xl border border-border px-6">
+              <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline">
+                Do you support agencies?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Yes! Our Agency plan offers unlimited Ads Packs, priority rendering, and team access (coming soon). It's designed for agencies and teams managing multiple clients and high-volume campaigns.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
 
