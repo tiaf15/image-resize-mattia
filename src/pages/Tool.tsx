@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +14,7 @@ import ResultsSection from "@/components/ResultsSection";
 import FormatPreview from "@/components/FormatPreview";
 import RecentGenerations from "@/components/RecentGenerations";
 import { useLocalHistory, HistoryEntry } from "@/hooks/useLocalHistory";
+import { extractDominantColor } from "@/lib/colorExtractor";
 
 type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
 
@@ -55,8 +56,24 @@ export default function Tool() {
   const [generationMode, setGenerationMode] = useState<GenerationMode>("high-quality");
   const [ctaEnabled, setCtaEnabled] = useState(false);
   const [ctaLabel, setCtaLabel] = useState("shop-now");
+  const [detectedColor, setDetectedColor] = useState<string | null>(null);
   const { toast } = useToast();
   const { history, addEntry, clearHistory } = useLocalHistory();
+
+  // Extract dominant color whenever master image changes
+  useEffect(() => {
+    if (masterImage && ctaEnabled) {
+      extractDominantColor(masterImage).then((result) => {
+        if (result) {
+          setDetectedColor(result.hex);
+        } else {
+          setDetectedColor(null);
+        }
+      });
+    } else {
+      setDetectedColor(null);
+    }
+  }, [masterImage, ctaEnabled]);
 
   const handleFormatToggle = (format: FormatKey) => {
     setSelectedFormats((prev) =>
@@ -128,8 +145,9 @@ export default function Tool() {
 
     try {
       const ctaText = ctaEnabled ? ctaOptions.find(o => o.value === ctaLabel)?.label : null;
+      const ctaColor = ctaEnabled && detectedColor ? detectedColor : null;
       const { data, error } = await supabase.functions.invoke("generate-formats", {
-        body: { masterImage, selectedFormats, mode: generationMode, cta: ctaText },
+        body: { masterImage, selectedFormats, mode: generationMode, cta: ctaText, ctaColor },
       });
       if (error) throw error;
       if (data?.formats) {
@@ -386,9 +404,17 @@ export default function Tool() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    This will appear as a clean overlay at the bottom of each generated image.
-                  </p>
+                  <div className="flex items-center gap-2 mt-3 p-2 bg-primary/5 rounded-lg">
+                    {detectedColor && (
+                      <div 
+                        className="w-4 h-4 rounded-full border border-border flex-shrink-0" 
+                        style={{ backgroundColor: detectedColor }}
+                      />
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      CTA color will adapt automatically to your image.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
