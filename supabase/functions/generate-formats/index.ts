@@ -13,7 +13,7 @@ const formatConfigs = [
   { ratio: "16:9", size: "1536x1024" },
 ];
 
-const outpaintingPrompt = "Mantieni l'immagine esattamente identica nella composizione, nei soggetti, nei colori e nello stile. Adatta al nuovo formato con outpainting. Non aggiungere nuovi elementi.";
+const outpaintingPrompt = "Keep the image exactly identical in composition, subjects, colors and style. Only change the aspect ratio by adapting the image to the new format. Do not add new elements. Do not modify the subject. Only perform the outpainting necessary to complete the new format.";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
