@@ -22,16 +22,26 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
 
-    const { masterImage, selectedFormats, mode = "high-quality" } = await req.json();
+    const { masterImage, selectedFormats, mode = "high-quality", cta = null } = await req.json();
     if (!masterImage) throw new Error("Master image is required");
     if (!selectedFormats || !Array.isArray(selectedFormats) || selectedFormats.length === 0) {
       throw new Error("At least one format must be selected");
     }
 
+    const ctaInstruction = cta 
+      ? `\n\nIMPORTANT CTA OVERLAY: Add a clean, modern call-to-action button at the bottom center of the image with the text "${cta}". The button should have:
+- A semi-transparent dark or white background (whichever contrasts better with the image)
+- Rounded corners (pill-shaped)
+- Modern sans-serif typography
+- Subtle shadow for depth
+- Positioned in the lower third of the image
+- The button should look professional and not obstruct the main subject.`
+      : "";
+
     const isHighQuality = mode === "high-quality";
     const modelToUse = isHighQuality ? "google/gemini-3-pro-image-preview" : "google/gemini-2.5-flash-image-preview";
 
-    console.log(`Starting format generation (${mode} mode, model: ${modelToUse}) for: ${selectedFormats.join(", ")}`);
+    console.log(`Starting format generation (${mode} mode, model: ${modelToUse}, CTA: ${cta || 'none'}) for: ${selectedFormats.join(", ")}`);
     const formats: Partial<Record<FormatKey, string>> = {};
 
     for (const ratio of selectedFormats as FormatKey[]) {
@@ -57,10 +67,10 @@ STRICT REQUIREMENTS:
 5. SEAMLESS BLENDING: Any extended areas must blend naturally with the original composition
 6. QUALITY: Maintain high resolution and sharp details throughout
 
-Generate a professional-quality ${config.aspectRatio} image now.`;
+Generate a professional-quality ${config.aspectRatio} image now.${ctaInstruction}`;
 
         // Fast Mode: simpler, lighter prompt for speed
-        const fastModePrompt = `Create a ${config.aspectRatio} version (${config.width}x${config.height}px) of this image. Keep the main subject centered and extend the background naturally to fit the new format.`;
+        const fastModePrompt = `Create a ${config.aspectRatio} version (${config.width}x${config.height}px) of this image. Keep the main subject centered and extend the background naturally to fit the new format.${ctaInstruction}`;
 
         const prompt = isHighQuality ? highQualityPrompt : fastModePrompt;
 

@@ -6,7 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X, Zap, Crown } from "lucide-react";
+import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X, Zap, Crown, Type } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import ResultsSection from "@/components/ResultsSection";
 import FormatPreview from "@/components/FormatPreview";
 import RecentGenerations from "@/components/RecentGenerations";
@@ -30,6 +33,15 @@ const availableFormats: { key: FormatKey; label: string; size: string; use: stri
 
 type GenerationMode = "high-quality" | "fast";
 
+const ctaOptions = [
+  { value: "shop-now", label: "Shop Now" },
+  { value: "learn-more", label: "Learn More" },
+  { value: "buy-now", label: "Buy Now" },
+  { value: "sign-up", label: "Sign Up" },
+  { value: "discover-more", label: "Discover More" },
+  { value: "book-now", label: "Book Now" },
+];
+
 export default function Tool() {
   const [activeTab, setActiveTab] = useState("upload");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -41,6 +53,8 @@ export default function Tool() {
   const [generationTime, setGenerationTime] = useState<number | null>(null);
   const [selectedFormats, setSelectedFormats] = useState<FormatKey[]>([]);
   const [generationMode, setGenerationMode] = useState<GenerationMode>("high-quality");
+  const [ctaEnabled, setCtaEnabled] = useState(false);
+  const [ctaLabel, setCtaLabel] = useState("shop-now");
   const { toast } = useToast();
   const { history, addEntry, clearHistory } = useLocalHistory();
 
@@ -113,8 +127,9 @@ export default function Tool() {
     setGenerationTime(Date.now());
 
     try {
+      const ctaText = ctaEnabled ? ctaOptions.find(o => o.value === ctaLabel)?.label : null;
       const { data, error } = await supabase.functions.invoke("generate-formats", {
-        body: { masterImage, selectedFormats, mode: generationMode },
+        body: { masterImage, selectedFormats, mode: generationMode, cta: ctaText },
       });
       if (error) throw error;
       if (data?.formats) {
@@ -140,6 +155,8 @@ export default function Tool() {
     setPrompt("");
     setGenerationTime(null);
     setSelectedFormats([]);
+    setCtaEnabled(false);
+    setCtaLabel("shop-now");
   };
 
   const handleHistorySelect = (entry: HistoryEntry) => {
@@ -330,6 +347,49 @@ export default function Tool() {
               </div>
               {selectedFormats.length === 0 && (
                 <p className="text-sm text-muted-foreground mt-4 text-center">Select at least one format to generate</p>
+              )}
+            </div>
+
+            {/* CTA Overlay Option */}
+            <div className="bg-card rounded-2xl border border-border p-6 md:p-8 mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Type className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">CTA Overlay</h2>
+                    <p className="text-sm text-muted-foreground">Add a call-to-action button to your images</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={ctaEnabled}
+                  onCheckedChange={setCtaEnabled}
+                  aria-label="Enable CTA overlay"
+                />
+              </div>
+              
+              {ctaEnabled && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <Label htmlFor="cta-select" className="text-sm font-medium text-foreground mb-2 block">
+                    Select CTA Label
+                  </Label>
+                  <Select value={ctaLabel} onValueChange={setCtaLabel}>
+                    <SelectTrigger id="cta-select" className="w-full sm:w-64">
+                      <SelectValue placeholder="Choose a CTA" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ctaOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    This will appear as a clean overlay at the bottom of each generated image.
+                  </p>
+                </div>
               )}
             </div>
 
