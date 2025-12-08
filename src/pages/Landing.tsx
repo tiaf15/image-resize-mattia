@@ -8,12 +8,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-// Example images
-import exampleOriginal from "@/assets/example-original.png";
-import example1x1 from "@/assets/example-1x1.png";
-import example4x5 from "@/assets/example-4x5.png";
-import example9x16 from "@/assets/example-9x16.png";
-import example16x9 from "@/assets/example-16x9.png";
+// Demo images - same image adapted to different formats
+import demo1x1 from "@/assets/demo-1x1.jpg";
+import demo4x5 from "@/assets/demo-4x5.jpg";
+import demo9x16 from "@/assets/demo-9x16.jpg";
+import demo16x9 from "@/assets/demo-16x9.jpg";
+
 const formats = [
   { ratio: "1:1", size: "1080×1080", use: "Instagram Post, Facebook" },
   { ratio: "4:5", size: "1080×1350", use: "Instagram Feed" },
@@ -281,7 +281,7 @@ export default function Landing() {
               <div className="flex-shrink-0 text-center">
                 <div className="w-48 h-48 rounded-xl border-2 border-primary/40 mb-3 mx-auto overflow-hidden shadow-lg">
                   <img 
-                    src={exampleOriginal} 
+                    src={demo1x1} 
                     alt="Original input image" 
                     className="w-full h-full object-cover"
                   />
@@ -305,10 +305,10 @@ export default function Landing() {
               {/* Output Formats */}
               <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-6 items-end">
                 {[
-                  { ratio: "1:1", size: "1080×1080", w: 100, h: 100, img: example1x1 },
-                  { ratio: "4:5", size: "1080×1350", w: 80, h: 100, img: example4x5 },
-                  { ratio: "9:16", size: "1080×1920", w: 56, h: 100, img: example9x16 },
-                  { ratio: "16:9", size: "1920×1080", w: 120, h: 68, img: example16x9 },
+                  { ratio: "1:1", size: "1080×1080", w: 100, h: 100, img: demo1x1 },
+                  { ratio: "4:5", size: "1080×1350", w: 80, h: 100, img: demo4x5 },
+                  { ratio: "9:16", size: "1080×1920", w: 56, h: 100, img: demo9x16 },
+                  { ratio: "16:9", size: "1920×1080", w: 120, h: 68, img: demo16x9 },
                 ].map((format) => (
                   <div key={format.ratio} className="text-center">
                     <div 
@@ -345,7 +345,7 @@ export default function Landing() {
               <div className="text-center">
                 <div className="w-40 h-40 rounded-xl border border-border mb-3 mx-auto relative overflow-hidden shadow-md">
                   <img 
-                    src={example1x1} 
+                    src={demo1x1} 
                     alt="Image without CTA" 
                     className="w-full h-full object-cover"
                   />
@@ -360,7 +360,7 @@ export default function Landing() {
               <div className="text-center">
                 <div className="w-40 h-40 rounded-xl border-2 border-primary/40 mb-3 mx-auto relative overflow-hidden shadow-lg">
                   <img 
-                    src={example1x1} 
+                    src={demo1x1} 
                     alt="Image with CTA overlay" 
                     className="w-full h-full object-cover"
                   />
