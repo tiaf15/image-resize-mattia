@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Upload, Sparkles, Download, Shield, Zap, Layers } from "lucide-react";
+import { ArrowRight, Upload, Sparkles, Download, Shield, Zap, Layers, Crown, Building2, Check } from "lucide-react";
 
 const formats = [
   { ratio: "1:1", size: "1080×1080", use: "Instagram Post, Facebook" },
@@ -191,6 +191,145 @@ export default function Landing() {
                 All images are processed in real-time and automatically deleted after download.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Overview */}
+      <section className="py-20 px-6 bg-secondary/30">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Simple Pricing
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Choose the plan that fits your needs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Free Plan */}
+            <div className="bg-card rounded-2xl p-6 border border-border animate-fade-up" style={{ animationDelay: "0s" }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground">Free</h3>
+                  <p className="text-sm text-muted-foreground">Get started</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-foreground">€0</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  10 Ads Packs/month
+                </li>
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  PNG export only
+                </li>
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  Basic support
+                </li>
+              </ul>
+              <Link to="/pricing">
+                <Button variant="outline" size="sm" className="w-full">
+                  View Details
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="relative bg-gradient-to-b from-primary/10 to-accent/5 rounded-2xl p-6 border-2 border-primary shadow-glow animate-fade-up" style={{ animationDelay: "0.1s" }}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                Most Popular
+              </div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground">Pro</h3>
+                  <p className="text-sm text-muted-foreground">For professionals</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-foreground">€19</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  150 Ads Packs/month
+                </li>
+                <li className="flex items-center gap-2 text-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  All formats + exports
+                </li>
+                <li className="flex items-center gap-2 text-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  CTA, Styles & Safe Zones
+                </li>
+              </ul>
+              <Link to="/pricing">
+                <Button variant="accent" size="sm" className="w-full">
+                  View Details
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Agency Plan */}
+            <div className="bg-card rounded-2xl p-6 border border-border animate-fade-up" style={{ animationDelay: "0.2s" }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground">Agency</h3>
+                  <p className="text-sm text-muted-foreground">For teams</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-foreground">€49</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  Unlimited Ads Packs
+                </li>
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  Priority rendering
+                </li>
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  Team access (soon)
+                </li>
+              </ul>
+              <Link to="/pricing">
+                <Button variant="outline" size="sm" className="w-full">
+                  View Details
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="text-center mt-8">
+            <Link to="/pricing">
+              <Button variant="ghost" size="lg">
+                View Full Pricing
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
