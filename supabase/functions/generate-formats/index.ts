@@ -8,11 +8,11 @@ const corsHeaders = {
 
 type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
 
-const formatConfigs: Record<FormatKey, { width: number; height: number; description: string }> = {
-  "1:1": { width: 1080, height: 1080, description: "square 1:1 aspect ratio" },
-  "4:5": { width: 1080, height: 1350, description: "vertical 4:5 aspect ratio (taller than wide)" },
-  "9:16": { width: 1080, height: 1920, description: "vertical 9:16 aspect ratio (portrait/story format)" },
-  "16:9": { width: 1920, height: 1080, description: "horizontal 16:9 aspect ratio (widescreen landscape)" },
+const formatConfigs: Record<FormatKey, { width: number; height: number; aspectRatio: string }> = {
+  "1:1": { width: 1080, height: 1080, aspectRatio: "1:1 square" },
+  "4:5": { width: 1080, height: 1350, aspectRatio: "4:5 vertical portrait" },
+  "9:16": { width: 1080, height: 1920, aspectRatio: "9:16 tall vertical story" },
+  "16:9": { width: 1920, height: 1080, aspectRatio: "16:9 wide horizontal landscape" },
 };
 
 serve(async (req) => {
@@ -41,7 +41,18 @@ serve(async (req) => {
       try {
         console.log(`Generating ${ratio} (${config.width}x${config.height})...`);
 
-        const prompt = `Reframe and adapt this image to fit a ${config.description} with dimensions ${config.width}x${config.height} pixels. Keep the main subject, colors, style, and mood exactly the same. Only extend or crop the canvas to match the new aspect ratio. Use outpainting to fill any new areas seamlessly while maintaining visual consistency. Do not add new objects or change the subject.`;
+        const prompt = `IMPORTANT: Generate a NEW image with EXACTLY ${config.aspectRatio} aspect ratio (${config.width}x${config.height} pixels).
+
+Look at the reference image I'm providing. Create a new version of this same scene that fits perfectly into a ${config.aspectRatio} format.
+
+Requirements:
+- The output MUST be ${config.aspectRatio} format - this is critical
+- Keep the same subject, colors, lighting and style
+- Extend the background/environment to fill the new aspect ratio
+- The main subject should remain centered and intact
+- Add natural extensions to the scene to fill the ${config.aspectRatio} canvas
+
+Generate the image now in ${config.aspectRatio} format.`;
 
         const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -50,7 +61,7 @@ serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash-image-preview",
+            model: "google/gemini-3-pro-image-preview",
             messages: [
               {
                 role: "user",
@@ -75,9 +86,9 @@ serve(async (req) => {
 
         if (generatedImageUrl) {
           formats[ratio] = generatedImageUrl;
-          console.log(`${ratio} done`);
+          console.log(`${ratio} done successfully`);
         } else {
-          console.error(`No image returned for ${ratio}`);
+          console.error(`No image returned for ${ratio}`, JSON.stringify(data));
         }
       } catch (e) {
         console.error(`Error ${ratio}:`, e);
