@@ -97,8 +97,16 @@ export default function Landing() {
           
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 items-end">
             {formats.map((format, index) => {
-              const [w, h] = format.ratio.split(":").map(Number);
-              const aspectRatio = w / h;
+              // Calculate preview dimensions based on a reference size
+              const baseSize = 120;
+              const previewSizes: Record<string, { width: number; height: number }> = {
+                "1:1": { width: baseSize, height: baseSize },
+                "4:5": { width: baseSize * 0.8, height: baseSize },
+                "9:16": { width: baseSize * 0.5625, height: baseSize },
+                "16:9": { width: baseSize, height: baseSize * 0.5625 },
+              };
+              
+              const size = previewSizes[format.ratio] || { width: baseSize, height: baseSize };
               
               return (
                 <div
@@ -106,18 +114,15 @@ export default function Landing() {
                   className="bg-card rounded-2xl p-6 border border-border hover-lift animate-fade-up flex flex-col"
                   style={{ animationDelay: `${0.1 * index}s` }}
                 >
-                  <div className="h-40 flex items-end justify-center mb-4">
+                  <div className="h-36 flex items-center justify-center mb-4">
                     <div 
                       className="bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl flex items-center justify-center border border-primary/30"
                       style={{ 
-                        aspectRatio: `${w}/${h}`,
-                        height: aspectRatio >= 1 ? `${100 / aspectRatio}%` : '100%',
-                        width: aspectRatio < 1 ? `${100 * aspectRatio}%` : '100%',
-                        maxHeight: '100%',
-                        maxWidth: '100%'
+                        width: `${size.width}px`,
+                        height: `${size.height}px`,
                       }}
                     >
-                      <span className="text-2xl font-bold text-primary">{format.ratio}</span>
+                      <span className="text-xl font-bold text-primary">{format.ratio}</span>
                     </div>
                   </div>
                   <h3 className="font-semibold text-foreground text-lg mb-1">{format.size}</h3>
