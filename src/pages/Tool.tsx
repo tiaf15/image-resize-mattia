@@ -10,7 +10,7 @@ import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X, Zap, Crown 
 import ResultsSection from "@/components/ResultsSection";
 import FormatPreview from "@/components/FormatPreview";
 import RecentGenerations from "@/components/RecentGenerations";
-import { useLocalHistory } from "@/hooks/useLocalHistory";
+import { useLocalHistory, HistoryEntry } from "@/hooks/useLocalHistory";
 
 type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
 
@@ -119,9 +119,9 @@ export default function Tool() {
       if (error) throw error;
       if (data?.formats) {
         setGeneratedFormats(data.formats);
-        // Add to local history
+        // Add to local history with generated formats
         if (masterImage) {
-          addEntry(masterImage, selectedFormats);
+          addEntry(masterImage, selectedFormats, data.formats);
         }
         toast({ title: "Ads Pack generated!", description: `${Object.keys(data.formats).length} format(s) ready for download` });
       }
@@ -140,6 +140,13 @@ export default function Tool() {
     setPrompt("");
     setGenerationTime(null);
     setSelectedFormats([]);
+  };
+
+  const handleHistorySelect = (entry: HistoryEntry) => {
+    setMasterImage(entry.thumbnail);
+    setGeneratedFormats(entry.generatedFormats);
+    setSelectedFormats(entry.formats as FormatKey[]);
+    setGenerationTime(entry.generatedAt.getTime());
   };
 
   return (
@@ -330,7 +337,7 @@ export default function Tool() {
             <FormatPreview selectedFormats={selectedFormats} />
 
             {/* Recent Generations - Local History */}
-            <RecentGenerations history={history} onClear={clearHistory} />
+            <RecentGenerations history={history} onClear={clearHistory} onSelect={handleHistorySelect} />
 
             <div className="text-center">
               <Button
