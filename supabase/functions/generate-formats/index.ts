@@ -22,7 +22,7 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
 
-    const { masterImage, selectedFormats, mode = "high-quality", cta = null, ctaColor = null } = await req.json();
+    const { masterImage, selectedFormats, mode = "high-quality", cta = null, ctaColor = null, adsStyle = null } = await req.json();
     if (!masterImage) throw new Error("Master image is required");
     if (!selectedFormats || !Array.isArray(selectedFormats) || selectedFormats.length === 0) {
       throw new Error("At least one format must be selected");
@@ -38,10 +38,21 @@ serve(async (req) => {
 - The button should look professional and not obstruct the main subject.`
       : "";
 
+    // Ads Style instructions
+    const adsStyleInstructions: Record<string, string> = {
+      "clean-frame": `\n\nADS STYLE - CLEAN FRAME: Add a subtle, elegant frame around the image. Use a thin white or dark border (whichever contrasts better) with softly rounded corners. The frame should be minimal and refined, giving a polished, professional look without distracting from the content.`,
+      "soft-gradient": `\n\nADS STYLE - SOFT GRADIENT: Apply a gentle, semi-transparent gradient overlay at the edges of the image. The gradient should fade from a complementary color (derived from the image's palette) towards transparency at the center. This creates depth and visual interest while keeping the main subject clear.`,
+      "promo-badge": `\n\nADS STYLE - PROMO BADGE: Add a modern promotional badge in the top-right or top-left corner of the image. The badge should say "SALE" or "NEW" in bold, clean typography. Use a vibrant accent color (red, orange, or brand-matching) with white text. The badge should be angled slightly and have a modern 2025 aesthetic with subtle shadow.`,
+      "highlight-glow": `\n\nADS STYLE - HIGHLIGHT GLOW: Add a soft, subtle glow effect around the main subject or product in the image. The glow should be a warm or complementary color that enhances the subject without overpowering it. This creates a premium, eye-catching effect perfect for product showcases.`,
+      "minimal-shadow": `\n\nADS STYLE - MINIMAL SHADOW BANNER: Add an elegant gradient shadow at the bottom of the image, fading from semi-transparent dark/black at the bottom edge to fully transparent about 1/4 up the image. This creates space for text overlays and gives a sophisticated, modern advertising look.`,
+    };
+
+    const styleInstruction = adsStyle && adsStyleInstructions[adsStyle] ? adsStyleInstructions[adsStyle] : "";
+
     const isHighQuality = mode === "high-quality";
     const modelToUse = isHighQuality ? "google/gemini-3-pro-image-preview" : "google/gemini-2.5-flash-image-preview";
 
-    console.log(`Starting format generation (${mode} mode, model: ${modelToUse}, CTA: ${cta || 'none'}, CTA Color: ${ctaColor || 'auto'}) for: ${selectedFormats.join(", ")}`);
+    console.log(`Starting format generation (${mode} mode, model: ${modelToUse}, CTA: ${cta || 'none'}, CTA Color: ${ctaColor || 'auto'}, Style: ${adsStyle || 'none'}) for: ${selectedFormats.join(", ")}`);
     const formats: Partial<Record<FormatKey, string>> = {};
 
     for (const ratio of selectedFormats as FormatKey[]) {
@@ -67,10 +78,10 @@ STRICT REQUIREMENTS:
 5. SEAMLESS BLENDING: Any extended areas must blend naturally with the original composition
 6. QUALITY: Maintain high resolution and sharp details throughout
 
-Generate a professional-quality ${config.aspectRatio} image now.${ctaInstruction}`;
+Generate a professional-quality ${config.aspectRatio} image now.${styleInstruction}${ctaInstruction}`;
 
         // Fast Mode: simpler, lighter prompt for speed
-        const fastModePrompt = `Create a ${config.aspectRatio} version (${config.width}x${config.height}px) of this image. Keep the main subject centered and extend the background naturally to fit the new format.${ctaInstruction}`;
+        const fastModePrompt = `Create a ${config.aspectRatio} version (${config.width}x${config.height}px) of this image. Keep the main subject centered and extend the background naturally to fit the new format.${styleInstruction}${ctaInstruction}`;
 
         const prompt = isHighQuality ? highQualityPrompt : fastModePrompt;
 
