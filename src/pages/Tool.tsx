@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X } from "lucide-react";
 import ResultsSection from "@/components/ResultsSection";
+import FormatPreview from "@/components/FormatPreview";
 
 type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
 
@@ -266,6 +267,9 @@ export default function Tool() {
                 <p className="text-sm text-muted-foreground mt-4 text-center">Select at least one format to generate</p>
               )}
             </div>
+
+            {/* Format Preview */}
+            <FormatPreview selectedFormats={selectedFormats} />
 
             <div className="text-center">
               <Button
