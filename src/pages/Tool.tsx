@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X } from "lucide-react";
+import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X, Zap, Crown } from "lucide-react";
 import ResultsSection from "@/components/ResultsSection";
 import FormatPreview from "@/components/FormatPreview";
 
@@ -26,6 +26,8 @@ const availableFormats: { key: FormatKey; label: string; size: string; use: stri
   { key: "16:9", label: "16:9", size: "1920×1080", use: "YouTube, LinkedIn, Twitter" },
 ];
 
+type GenerationMode = "high-quality" | "fast";
+
 export default function Tool() {
   const [activeTab, setActiveTab] = useState("upload");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -36,6 +38,7 @@ export default function Tool() {
   const [generatedFormats, setGeneratedFormats] = useState<GeneratedFormats | null>(null);
   const [generationTime, setGenerationTime] = useState<number | null>(null);
   const [selectedFormats, setSelectedFormats] = useState<FormatKey[]>([]);
+  const [generationMode, setGenerationMode] = useState<GenerationMode>("high-quality");
   const { toast } = useToast();
 
   const handleFormatToggle = (format: FormatKey) => {
@@ -108,7 +111,7 @@ export default function Tool() {
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-formats", {
-        body: { masterImage, selectedFormats },
+        body: { masterImage, selectedFormats, mode: generationMode },
       });
       if (error) throw error;
       if (data?.formats) {
@@ -233,6 +236,54 @@ export default function Tool() {
                   )}
                 </TabsContent>
               </Tabs>
+            </div>
+
+            {/* Generation Mode */}
+            <div className="bg-card rounded-2xl border border-border p-6 md:p-8 mb-8">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Generation Mode</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={() => setGenerationMode("high-quality")}
+                  className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all ${
+                    generationMode === "high-quality"
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    generationMode === "high-quality" ? "bg-primary/20" : "bg-muted"
+                  }`}>
+                    <Crown className={`w-5 h-5 ${generationMode === "high-quality" ? "text-primary" : "text-muted-foreground"}`} />
+                  </div>
+                  <div className="flex-1">
+                    <span className="font-semibold text-foreground block mb-1">High Quality</span>
+                    <p className="text-sm text-muted-foreground">
+                      Maximum visual accuracy and consistency. Uses detailed AI guidance for best results.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setGenerationMode("fast")}
+                  className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all ${
+                    generationMode === "fast"
+                      ? "border-accent bg-accent/5 ring-2 ring-accent/20"
+                      : "border-border hover:border-accent/50"
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    generationMode === "fast" ? "bg-accent/20" : "bg-muted"
+                  }`}>
+                    <Zap className={`w-5 h-5 ${generationMode === "fast" ? "text-accent" : "text-muted-foreground"}`} />
+                  </div>
+                  <div className="flex-1">
+                    <span className="font-semibold text-foreground block mb-1">Fast Mode</span>
+                    <p className="text-sm text-muted-foreground">
+                      Quicker output with lighter processing. Good for previews and cost optimization.
+                    </p>
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Format Selection */}

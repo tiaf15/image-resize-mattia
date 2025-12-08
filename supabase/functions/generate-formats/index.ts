@@ -22,13 +22,16 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
 
-    const { masterImage, selectedFormats } = await req.json();
+    const { masterImage, selectedFormats, mode = "high-quality" } = await req.json();
     if (!masterImage) throw new Error("Master image is required");
     if (!selectedFormats || !Array.isArray(selectedFormats) || selectedFormats.length === 0) {
       throw new Error("At least one format must be selected");
     }
 
-    console.log(`Starting format generation for: ${selectedFormats.join(", ")}`);
+    const isHighQuality = mode === "high-quality";
+    const modelToUse = isHighQuality ? "google/gemini-3-pro-image-preview" : "google/gemini-2.5-flash-image-preview";
+
+    console.log(`Starting format generation (${mode} mode, model: ${modelToUse}) for: ${selectedFormats.join(", ")}`);
     const formats: Partial<Record<FormatKey, string>> = {};
 
     for (const ratio of selectedFormats as FormatKey[]) {
@@ -39,20 +42,27 @@ serve(async (req) => {
       }
 
       try {
-        console.log(`Generating ${ratio} (${config.width}x${config.height})...`);
+        console.log(`Generating ${ratio} (${config.width}x${config.height}) in ${mode} mode...`);
 
-        const prompt = `IMPORTANT: Generate a NEW image with EXACTLY ${config.aspectRatio} aspect ratio (${config.width}x${config.height} pixels).
+        // High Quality: detailed, strict prompt for maximum accuracy
+        const highQualityPrompt = `CRITICAL INSTRUCTION: Generate a NEW image with EXACTLY ${config.aspectRatio} aspect ratio (${config.width}x${config.height} pixels).
 
-Look at the reference image I'm providing. Create a new version of this same scene that fits perfectly into a ${config.aspectRatio} format.
+Analyze the reference image carefully. Your task is to recreate this exact scene adapted to a ${config.aspectRatio} format while maintaining:
 
-Requirements:
-- The output MUST be ${config.aspectRatio} format - this is critical
-- Keep the same subject, colors, lighting and style
-- Extend the background/environment to fill the new aspect ratio
-- The main subject should remain centered and intact
-- Add natural extensions to the scene to fill the ${config.aspectRatio} canvas
+STRICT REQUIREMENTS:
+1. ASPECT RATIO: The output MUST be exactly ${config.aspectRatio} (${config.width}x${config.height}px) - this is non-negotiable
+2. VISUAL CONSISTENCY: Preserve exact colors, lighting conditions, shadows, and visual style
+3. SUBJECT INTEGRITY: The main subject must remain centered, complete, and undistorted
+4. NATURAL EXTENSION: Intelligently extend the background/environment to fill the ${config.aspectRatio} canvas
+5. SEAMLESS BLENDING: Any extended areas must blend naturally with the original composition
+6. QUALITY: Maintain high resolution and sharp details throughout
 
-Generate the image now in ${config.aspectRatio} format.`;
+Generate a professional-quality ${config.aspectRatio} image now.`;
+
+        // Fast Mode: simpler, lighter prompt for speed
+        const fastModePrompt = `Create a ${config.aspectRatio} version (${config.width}x${config.height}px) of this image. Keep the main subject centered and extend the background naturally to fit the new format.`;
+
+        const prompt = isHighQuality ? highQualityPrompt : fastModePrompt;
 
         const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -61,7 +71,7 @@ Generate the image now in ${config.aspectRatio} format.`;
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-3-pro-image-preview",
+            model: modelToUse,
             messages: [
               {
                 role: "user",
