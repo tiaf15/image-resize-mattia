@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload, Sparkles, ArrowLeft, Layers, ImageIcon, Loader2, X, Zap, Crown } from "lucide-react";
 import ResultsSection from "@/components/ResultsSection";
 import FormatPreview from "@/components/FormatPreview";
+import RecentGenerations from "@/components/RecentGenerations";
+import { useLocalHistory } from "@/hooks/useLocalHistory";
 
 type FormatKey = "1:1" | "4:5" | "9:16" | "16:9";
 
@@ -40,6 +42,7 @@ export default function Tool() {
   const [selectedFormats, setSelectedFormats] = useState<FormatKey[]>([]);
   const [generationMode, setGenerationMode] = useState<GenerationMode>("high-quality");
   const { toast } = useToast();
+  const { history, addEntry, clearHistory } = useLocalHistory();
 
   const handleFormatToggle = (format: FormatKey) => {
     setSelectedFormats((prev) =>
@@ -116,6 +119,10 @@ export default function Tool() {
       if (error) throw error;
       if (data?.formats) {
         setGeneratedFormats(data.formats);
+        // Add to local history
+        if (masterImage) {
+          addEntry(masterImage, selectedFormats);
+        }
         toast({ title: "Ads Pack generated!", description: `${Object.keys(data.formats).length} format(s) ready for download` });
       }
     } catch (error: unknown) {
@@ -321,6 +328,9 @@ export default function Tool() {
 
             {/* Format Preview */}
             <FormatPreview selectedFormats={selectedFormats} />
+
+            {/* Recent Generations - Local History */}
+            <RecentGenerations history={history} onClear={clearHistory} />
 
             <div className="text-center">
               <Button
