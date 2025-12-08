@@ -47,7 +47,7 @@ export default function Landing() {
               Pricing
             </Link>
           </nav>
-          <Link to="/tool">
+          <Link to="/auth">
             <Button variant="accent" size="sm">
               Get Started
               <ArrowRight className="w-4 h-4" />
@@ -76,7 +76,7 @@ export default function Landing() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
-            <Link to="/tool">
+            <Link to="/auth">
               <Button variant="accent" size="xl" className="w-full sm:w-auto">
                 Generate Your Ads Pack
                 <ArrowRight className="w-5 h-5" />
