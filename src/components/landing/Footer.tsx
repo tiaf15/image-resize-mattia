@@ -47,9 +47,9 @@ const Footer = memo(function Footer() {
             <h4 className="font-semibold text-foreground">Company</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   About
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
