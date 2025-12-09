@@ -23,18 +23,13 @@ const HeroSection = memo(function HeroSection() {
           Upload or create with AI, download the complete pack in one click.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up [animation-delay:0.2s]">
+        <div className="flex justify-center animate-fade-up [animation-delay:0.2s]">
           <Link to="/auth">
-            <Button variant="accent" size="xl" className="w-full sm:w-auto">
+            <Button variant="accent" size="xl">
               Generate Your Ads Pack
               <ArrowRight className="w-5 h-5" />
             </Button>
           </Link>
-          <a href="#how-it-works">
-            <Button variant="outline" size="xl" className="w-full sm:w-auto">
-              How It Works
-            </Button>
-          </a>
         </div>
       </div>
     </section>
