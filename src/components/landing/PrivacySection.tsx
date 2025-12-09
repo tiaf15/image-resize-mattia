@@ -17,6 +17,9 @@ const PrivacySection = memo(function PrivacySection() {
               For your privacy, no images are stored on our servers. 
               All images are processed in real-time and automatically deleted after download.
             </p>
+            <p className="text-sm text-primary font-medium mt-2">
+              Auto-delete after processing for full privacy
+            </p>
           </div>
         </div>
       </div>
