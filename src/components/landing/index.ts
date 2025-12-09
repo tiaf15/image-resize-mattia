@@ -3,6 +3,7 @@ export { default as HeroSection } from "./HeroSection";
 export { default as FormatsSection } from "./FormatsSection";
 export { default as HowItWorksSection } from "./HowItWorksSection";
 export { default as TestimonialsSection } from "./TestimonialsSection";
+export { default as PlatformsSection } from "./PlatformsSection";
 export { default as SeeItInActionSection } from "./SeeItInActionSection";
 export { default as WhyChooseSection } from "./WhyChooseSection";
 export { default as PrivacySection } from "./PrivacySection";
