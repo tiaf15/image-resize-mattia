@@ -22,10 +22,10 @@ export default function Landing() {
       <HeroSection />
       <FormatsSection />
       <HowItWorksSection />
+      <SeeItInActionSection />
       <PlatformsSection />
       <TestimonialsSection />
       <WhoIsThisForSection />
-      <SeeItInActionSection />
       <WhyChooseSection />
       <PrivacySection />
       <PricingSection />
