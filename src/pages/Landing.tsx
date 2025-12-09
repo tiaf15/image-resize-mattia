@@ -5,6 +5,7 @@ import {
   HowItWorksSection,
   PlatformsSection,
   TestimonialsSection,
+  WhoIsThisForSection,
   SeeItInActionSection,
   WhyChooseSection,
   PrivacySection,
@@ -23,6 +24,7 @@ export default function Landing() {
       <HowItWorksSection />
       <PlatformsSection />
       <TestimonialsSection />
+      <WhoIsThisForSection />
       <SeeItInActionSection />
       <WhyChooseSection />
       <PrivacySection />
