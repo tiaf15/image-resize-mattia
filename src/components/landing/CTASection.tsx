@@ -25,6 +25,9 @@ const CTASection = memo(function CTASection() {
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
+            <p className="text-sm text-primary-foreground/70 mt-4">
+              Optimized for all major platforms • No credit card required
+            </p>
           </div>
         </div>
       </div>
