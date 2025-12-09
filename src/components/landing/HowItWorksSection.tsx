@@ -47,7 +47,7 @@ const StepCard = memo(function StepCard({
 
 const HowItWorksSection = memo(function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-20 px-6 bg-secondary/50">
+    <section id="how-it-works" className="py-24 px-6 bg-secondary/50">
       <div className="container mx-auto max-w-5xl">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
