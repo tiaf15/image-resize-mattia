@@ -3,12 +3,10 @@ import {
   HeroSection,
   FormatsSection,
   HowItWorksSection,
-  PlatformsSection,
-  TestimonialsSection,
-  WhoIsThisForSection,
   SeeItInActionSection,
   WhyChooseSection,
-  PrivacySection,
+  TestimonialsSection,
+  WhoIsThisForSection,
   PricingSection,
   CTASection,
   FAQSection,
@@ -22,12 +20,10 @@ export default function Landing() {
       <HeroSection />
       <FormatsSection />
       <HowItWorksSection />
-      <PlatformsSection />
-      <TestimonialsSection />
-      <WhoIsThisForSection />
       <SeeItInActionSection />
       <WhyChooseSection />
-      <PrivacySection />
+      <TestimonialsSection />
+      <WhoIsThisForSection />
       <PricingSection />
       <CTASection />
       <FAQSection />
