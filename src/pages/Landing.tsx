@@ -5,6 +5,7 @@ import {
   HowItWorksSection,
   TestimonialsSection,
   SeeItInActionSection,
+  WhyChooseSection,
   PrivacySection,
   PricingSection,
   CTASection,
@@ -21,6 +22,7 @@ export default function Landing() {
       <HowItWorksSection />
       <TestimonialsSection />
       <SeeItInActionSection />
+      <WhyChooseSection />
       <PrivacySection />
       <PricingSection />
       <CTASection />
