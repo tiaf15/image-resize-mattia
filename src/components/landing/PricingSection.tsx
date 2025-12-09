@@ -27,7 +27,7 @@ const PLANS = [
 
 const PricingSection = memo(function PricingSection() {
   return (
-    <section className="py-24 px-6">
+    <section className="py-16 px-6">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">

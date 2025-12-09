@@ -45,7 +45,7 @@ const FormatCard = memo(function FormatCard({
 
 const FormatsSection = memo(function FormatsSection() {
   return (
-    <section className="py-24 px-6 bg-secondary/30">
+    <section className="py-20 px-6">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
