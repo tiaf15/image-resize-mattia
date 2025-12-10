@@ -13,9 +13,9 @@ const HeroSection = memo(function HeroSection() {
         </div>
         
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6 animate-fade-up">
-          One image,{" "}
-          <span className="text-primary">every format</span>{" "}
-          for your Ads
+          One image.{" "}
+          <span className="text-primary">Every format.</span>{" "}
+          Ready to publish.
         </h1>
         
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-up [animation-delay:0.1s]">
