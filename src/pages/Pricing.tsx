@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, X, Layers, Zap, Crown, Building2 } from "lucide-react";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const plans = [
   {
     name: "Free",
     icon: Zap,
-    price: "€0",
+    euroPrice: 0,
     period: "/month",
     description: "Perfect to get started",
     features: [
@@ -25,7 +26,7 @@ const plans = [
   {
     name: "Pro",
     icon: Crown,
-    price: "€19",
+    euroPrice: 19,
     period: "/month",
     description: "Best for professionals",
     badge: "Most Popular",
@@ -46,7 +47,7 @@ const plans = [
   {
     name: "Agency",
     icon: Building2,
-    price: "€49",
+    euroPrice: 49,
     period: "/month",
     description: "For teams and agencies",
     features: [
@@ -66,6 +67,8 @@ const plans = [
 ];
 
 export default function Pricing() {
+  const { formatPrice } = useCurrency();
+
   return (
     <div className="min-h-screen gradient-hero">
       {/* Header */}
@@ -138,7 +141,7 @@ export default function Pricing() {
                 </div>
 
                 <div className="text-center mb-8">
-                  <span className="text-5xl font-bold text-foreground">{plan.price}</span>
+                  <span className="text-5xl font-bold text-foreground">{formatPrice(plan.euroPrice)}</span>
                   <span className="text-muted-foreground">{plan.period}</span>
                 </div>
 

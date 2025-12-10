@@ -2,30 +2,33 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap, Crown, Building2 } from "lucide-react";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const PLANS = [
   {
     name: "Free",
     description: "Perfect for trying out",
-    price: "€0",
+    euroPrice: 0,
     icon: Zap,
   },
   {
     name: "Pro",
     description: "For professionals",
-    price: "€19",
+    euroPrice: 19,
     icon: Crown,
     featured: true,
   },
   {
     name: "Agency",
     description: "For teams & agencies",
-    price: "€49",
+    euroPrice: 49,
     icon: Building2,
   },
 ] as const;
 
 const PricingSection = memo(function PricingSection() {
+  const { formatPrice } = useCurrency();
+
   return (
     <section className="py-16 px-6">
       <div className="container mx-auto max-w-4xl">
@@ -61,7 +64,7 @@ const PricingSection = memo(function PricingSection() {
                 <h3 className="text-xl font-bold text-foreground mb-1">{plan.name}</h3>
                 <p className="text-sm text-muted-foreground mb-3">{plan.description}</p>
                 <div className="mb-2">
-                  <span className="text-2xl font-bold text-foreground">{plan.price}</span>
+                  <span className="text-2xl font-bold text-foreground">{formatPrice(plan.euroPrice)}</span>
                   <span className="text-muted-foreground text-sm">/month</span>
                 </div>
               </div>

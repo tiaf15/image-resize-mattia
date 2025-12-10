@@ -52,19 +52,24 @@ const Footer = memo(function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <a href="mailto:hello@adsimagepack.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Contact
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Terms of Service
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link to="/cookies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Cookie Policy
+                </Link>
               </li>
             </ul>
           </div>
