@@ -19,8 +19,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
+    const googleApiKey = Deno.env.get("GOOGLE_AI_API_KEY");
+    if (!googleApiKey) throw new Error("GOOGLE_AI_API_KEY not configured");
 
     const { masterImage, selectedFormats, mode = "high-quality", cta = null, ctaColor = null, adsStyle = null } = await req.json();
     if (!masterImage) throw new Error("Master image is required");
@@ -49,12 +49,26 @@ serve(async (req) => {
 
     const styleInstruction = adsStyle && adsStyleInstructions[adsStyle] ? adsStyleInstructions[adsStyle] : "";
 
-    const isHighQuality = mode === "high-quality";
-    const modelToUse = isHighQuality ? "google/gemini-3-pro-image-preview" : "google/gemini-2.5-flash-image-preview";
+    // Use gemini-2.0-flash-exp-image-generation for both modes (Google's image generation model)
+    const modelToUse = mode === "high-quality" 
+      ? "gemini-2.0-flash-exp-image-generation" 
+      : "gemini-2.0-flash-exp-image-generation";
 
     console.log(`Starting format generation (${mode} mode, model: ${modelToUse}, CTA: ${cta || 'none'}, CTA Color: ${ctaColor || 'auto'}, Style: ${adsStyle || 'none'}) for: ${selectedFormats.join(", ")}`);
     
-    // Generate all formats in parallel to avoid timeout
+    // Extract base64 data from masterImage if it's a data URL
+    let imageData = masterImage;
+    let mimeType = "image/png";
+    
+    if (masterImage.startsWith("data:")) {
+      const matches = masterImage.match(/^data:([^;]+);base64,(.+)$/);
+      if (matches) {
+        mimeType = matches[1];
+        imageData = matches[2];
+      }
+    }
+
+    // Generate all formats in parallel
     const generateFormat = async (ratio: FormatKey): Promise<[FormatKey, string | null]> => {
       const config = formatConfigs[ratio];
       if (!config) {
@@ -64,6 +78,8 @@ serve(async (req) => {
 
       try {
         console.log(`Generating ${ratio} (${config.width}x${config.height}) in ${mode} mode...`);
+
+        const isHighQuality = mode === "high-quality";
 
         const highQualityPrompt = `CRITICAL INSTRUCTION: Generate a NEW image with EXACTLY ${config.aspectRatio} aspect ratio (${config.width}x${config.height} pixels).
 
@@ -83,26 +99,35 @@ Generate a professional-quality ${config.aspectRatio} image now.${styleInstructi
 
         const prompt = isHighQuality ? highQualityPrompt : fastModePrompt;
 
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${lovableApiKey}`,
-            "Content-Type": "application/json",
+        const requestBody: any = {
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: mimeType,
+                    data: imageData,
+                  },
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseModalities: ["TEXT", "IMAGE"],
           },
-          body: JSON.stringify({
-            model: modelToUse,
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: prompt },
-                  { type: "image_url", image_url: { url: masterImage } }
-                ]
-              }
-            ],
-            modalities: ["image", "text"]
-          })
-        });
+        };
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${googleApiKey}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+          }
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -111,7 +136,17 @@ Generate a professional-quality ${config.aspectRatio} image now.${styleInstructi
         }
 
         const data = await response.json();
-        const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        
+        // Extract image from Google's response format
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        let generatedImageUrl = null;
+
+        for (const part of parts) {
+          if (part.inlineData?.mimeType?.startsWith("image/")) {
+            generatedImageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+            break;
+          }
+        }
 
         if (generatedImageUrl) {
           console.log(`${ratio} done successfully`);

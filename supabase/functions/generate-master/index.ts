@@ -10,43 +10,60 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
+    const googleApiKey = Deno.env.get("GOOGLE_AI_API_KEY");
+    if (!googleApiKey) throw new Error("GOOGLE_AI_API_KEY not configured");
 
     const { prompt } = await req.json();
     if (!prompt) throw new Error("Prompt is required");
 
     console.log("Generating master image with prompt:", prompt);
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
-        messages: [
-          {
-            role: "user",
-            content: `Generate a high-quality 1:1 square image (1024x1024 pixels) based on this description: ${prompt}`,
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${googleApiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `Generate a high-quality 1:1 square image (1024x1024 pixels) based on this description: ${prompt}`,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseModalities: ["TEXT", "IMAGE"],
           },
-        ],
-        modalities: ["image", "text"],
-      }),
-    });
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error("Lovable AI error:", response.status, errorData);
-      throw new Error(`Lovable AI error: ${response.status}`);
+      console.error("Google AI error:", response.status, errorData);
+      throw new Error(`Google AI error: ${response.status}`);
     }
 
     const data = await response.json();
-    const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    console.log("Google AI response structure:", JSON.stringify(data, null, 2));
+
+    // Extract image from Google's response format
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    let generatedImageUrl = null;
+
+    for (const part of parts) {
+      if (part.inlineData?.mimeType?.startsWith("image/")) {
+        generatedImageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        break;
+      }
+    }
 
     if (!generatedImageUrl) {
-      console.error("No image returned from Lovable AI:", JSON.stringify(data));
+      console.error("No image returned from Google AI:", JSON.stringify(data));
       throw new Error("No image generated");
     }
 
