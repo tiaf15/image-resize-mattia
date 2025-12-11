@@ -1,7 +1,22 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, X, Layers, Zap, Crown, Building2 } from "lucide-react";
+import { ArrowRight, Check, X, Layers, Zap, Crown, Building2, Loader2 } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+
+// Stripe price IDs mapping
+const STRIPE_PLANS = {
+  pro: {
+    priceId: "price_1SVJ9aCLNcN70cUDR3ZTQQcN",
+    productId: "prod_TSDaUK8WFfRvMn",
+  },
+  agency: {
+    priceId: "price_1Sd9r8CLNcN70cUD9vqcmhLZ",
+    productId: "prod_TaKWCuwXNfEKtJ",
+  },
+} as const;
 
 const plans = [
   {
@@ -68,6 +83,112 @@ const plans = [
 
 export default function Pricing() {
   const { formatPrice } = useCurrency();
+  const [searchParams] = useSearchParams();
+  const [user, setUser] = useState<any>(null);
+  const [subscription, setSubscription] = useState<{
+    subscribed: boolean;
+    product_id: string | null;
+    subscription_end: string | null;
+  } | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [checkingSubscription, setCheckingSubscription] = useState(true);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      if (user) {
+        checkSubscription();
+      } else {
+        setCheckingSubscription(false);
+      }
+    };
+    getUser();
+
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          setTimeout(() => checkSubscription(), 0);
+        } else {
+          setSubscription(null);
+          setCheckingSubscription(false);
+        }
+      }
+    );
+
+    return () => authSub.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      toast.success("Subscription successful! Welcome to AdsImagePack.");
+      checkSubscription();
+    } else if (searchParams.get("canceled") === "true") {
+      toast.info("Checkout was canceled.");
+    }
+  }, [searchParams]);
+
+  const checkSubscription = async () => {
+    try {
+      setCheckingSubscription(true);
+      const { data, error } = await supabase.functions.invoke("check-subscription");
+      if (error) throw error;
+      setSubscription(data);
+    } catch (error) {
+      console.error("Error checking subscription:", error);
+    } finally {
+      setCheckingSubscription(false);
+    }
+  };
+
+  const handleCheckout = async (planKey: "pro" | "agency") => {
+    if (!user) {
+      toast.error("Please login to subscribe");
+      return;
+    }
+
+    setLoading(planKey);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: STRIPE_PLANS[planKey].priceId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Failed to start checkout. Please try again.");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setLoading("manage");
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal");
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (error) {
+      console.error("Portal error:", error);
+      toast.error("Failed to open subscription management.");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const getCurrentPlan = () => {
+    if (!subscription?.subscribed || !subscription.product_id) return "free";
+    if (subscription.product_id === STRIPE_PLANS.pro.productId) return "pro";
+    if (subscription.product_id === STRIPE_PLANS.agency.productId) return "agency";
+    return "free";
+  };
+
+  const currentPlan = getCurrentPlan();
 
   return (
     <div className="min-h-screen gradient-hero">
@@ -88,12 +209,18 @@ export default function Pricing() {
               Pricing
             </Link>
           </nav>
-          <Link to="/tool">
-            <Button variant="accent" size="sm">
-              Get Started
-              <ArrowRight className="w-4 h-4" />
+          {user ? (
+            <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>
+              Sign Out
             </Button>
-          </Link>
+          ) : (
+            <Link to="/auth">
+              <Button variant="accent" size="sm">
+                Sign In
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          )}
         </div>
       </header>
 
@@ -107,6 +234,14 @@ export default function Pricing() {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "0.1s" }}>
             Choose the plan that fits your needs. Upgrade, downgrade, or cancel anytime.
           </p>
+          {subscription?.subscribed && (
+            <div className="mt-6 animate-fade-up" style={{ animationDelay: "0.2s" }}>
+              <Button variant="outline" onClick={handleManageSubscription} disabled={loading === "manage"}>
+                {loading === "manage" ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                Manage Subscription
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -114,64 +249,93 @@ export default function Pricing() {
       <section className="py-12 px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-            {plans.map((plan, index) => (
-              <div
-                key={plan.name}
-                className={`relative rounded-2xl p-8 animate-fade-up flex flex-col ${
-                  plan.highlighted
-                    ? "bg-gradient-to-b from-primary/10 to-accent/5 border-2 border-primary shadow-glow"
-                    : "bg-card border border-border"
-                }`}
-                style={{ animationDelay: `${0.1 * index}s` }}
-              >
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
-                    {plan.badge}
+            {plans.map((plan, index) => {
+              const planKey = plan.name.toLowerCase() as "free" | "pro" | "agency";
+              const isCurrentPlan = currentPlan === planKey;
+              const isPaid = planKey !== "free";
+
+              return (
+                <div
+                  key={plan.name}
+                  className={`relative rounded-2xl p-8 animate-fade-up flex flex-col ${
+                    plan.highlighted
+                      ? "bg-gradient-to-b from-primary/10 to-accent/5 border-2 border-primary shadow-glow"
+                      : "bg-card border border-border"
+                  } ${isCurrentPlan ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
+                  style={{ animationDelay: `${0.1 * index}s` }}
+                >
+                  {plan.badge && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                      {plan.badge}
+                    </div>
+                  )}
+                  {isCurrentPlan && (
+                    <div className="absolute -top-3 right-4 px-3 py-1 rounded-full bg-accent text-accent-foreground text-xs font-semibold">
+                      Your Plan
+                    </div>
+                  )}
+
+                  <div className="text-center mb-6">
+                    <div className={`w-14 h-14 mx-auto mb-4 rounded-xl flex items-center justify-center ${
+                      plan.highlighted ? "gradient-primary" : "bg-secondary"
+                    }`}>
+                      <plan.icon className={`w-7 h-7 ${plan.highlighted ? "text-primary-foreground" : "text-primary"}`} />
+                    </div>
+                    <h3 className="text-2xl font-bold text-foreground mb-1">{plan.name}</h3>
+                    <p className="text-muted-foreground text-sm">{plan.description}</p>
                   </div>
-                )}
 
-                <div className="text-center mb-6">
-                  <div className={`w-14 h-14 mx-auto mb-4 rounded-xl flex items-center justify-center ${
-                    plan.highlighted ? "gradient-primary" : "bg-secondary"
-                  }`}>
-                    <plan.icon className={`w-7 h-7 ${plan.highlighted ? "text-primary-foreground" : "text-primary"}`} />
+                  <div className="text-center mb-8">
+                    <span className="text-5xl font-bold text-foreground">{formatPrice(plan.euroPrice)}</span>
+                    <span className="text-muted-foreground">{plan.period}</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-foreground mb-1">{plan.name}</h3>
-                  <p className="text-muted-foreground text-sm">{plan.description}</p>
+
+                  <ul className="space-y-3 mb-8 flex-grow">
+                    {plan.features.map((feature) => (
+                      <li key={feature.text} className="flex items-start gap-3">
+                        {feature.included ? (
+                          <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <X className="w-5 h-5 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
+                        )}
+                        <span className={feature.included ? "text-foreground" : "text-muted-foreground/60"}>
+                          {feature.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-auto">
+                    {isCurrentPlan ? (
+                      <Button variant="outline" size="lg" className="w-full" disabled>
+                        Current Plan
+                      </Button>
+                    ) : isPaid ? (
+                      <Button
+                        variant={plan.highlighted ? "accent" : "outline"}
+                        size="lg"
+                        className="w-full"
+                        onClick={() => handleCheckout(planKey as "pro" | "agency")}
+                        disabled={loading === planKey || checkingSubscription}
+                      >
+                        {loading === planKey ? (
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        ) : null}
+                        {plan.cta}
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    ) : (
+                      <Link to="/tool" className="block">
+                        <Button variant="outline" size="lg" className="w-full">
+                          {plan.cta}
+                          <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
                 </div>
-
-                <div className="text-center mb-8">
-                  <span className="text-5xl font-bold text-foreground">{formatPrice(plan.euroPrice)}</span>
-                  <span className="text-muted-foreground">{plan.period}</span>
-                </div>
-
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {plan.features.map((feature) => (
-                    <li key={feature.text} className="flex items-start gap-3">
-                      {feature.included ? (
-                        <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      ) : (
-                        <X className="w-5 h-5 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
-                      )}
-                      <span className={feature.included ? "text-foreground" : "text-muted-foreground/60"}>
-                        {feature.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link to="/tool" className="mt-auto">
-                  <Button 
-                    variant={plan.highlighted ? "accent" : "outline"} 
-                    size="lg" 
-                    className="w-full"
-                  >
-                    {plan.cta}
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
