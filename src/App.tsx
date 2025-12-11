@@ -12,6 +12,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import NotFound from "./pages/NotFound";
+import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/cookies" element={<CookiePolicy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Chatbot />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
