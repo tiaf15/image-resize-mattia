@@ -19,7 +19,7 @@ serve(async (req) => {
     console.log("Generating master image with prompt:", prompt);
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${googleApiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${googleApiKey}`,
       {
         method: "POST",
         headers: {
@@ -36,7 +36,7 @@ serve(async (req) => {
             },
           ],
           generationConfig: {
-            responseModalities: ["TEXT", "IMAGE"],
+            responseModalities: ["IMAGE", "TEXT"],
           },
         }),
       }

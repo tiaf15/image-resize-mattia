@@ -49,10 +49,8 @@ serve(async (req) => {
 
     const styleInstruction = adsStyle && adsStyleInstructions[adsStyle] ? adsStyleInstructions[adsStyle] : "";
 
-    // Use gemini-2.0-flash-exp-image-generation for both modes (Google's image generation model)
-    const modelToUse = mode === "high-quality" 
-      ? "gemini-2.0-flash-exp-image-generation" 
-      : "gemini-2.0-flash-exp-image-generation";
+    // Use gemini-2.0-flash-exp for image generation
+    const modelToUse = "gemini-2.0-flash-exp";
 
     console.log(`Starting format generation (${mode} mode, model: ${modelToUse}, CTA: ${cta || 'none'}, CTA Color: ${ctaColor || 'auto'}, Style: ${adsStyle || 'none'}) for: ${selectedFormats.join(", ")}`);
     
@@ -99,7 +97,7 @@ Generate a professional-quality ${config.aspectRatio} image now.${styleInstructi
 
         const prompt = isHighQuality ? highQualityPrompt : fastModePrompt;
 
-        const requestBody: any = {
+        const requestBody = {
           contents: [
             {
               parts: [
@@ -114,7 +112,7 @@ Generate a professional-quality ${config.aspectRatio} image now.${styleInstructi
             },
           ],
           generationConfig: {
-            responseModalities: ["TEXT", "IMAGE"],
+            responseModalities: ["IMAGE", "TEXT"],
           },
         };
 
