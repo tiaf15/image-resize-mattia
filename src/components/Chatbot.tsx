@@ -10,6 +10,63 @@ interface Message {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chatbot`;
 
+// Simple markdown renderer
+const renderMarkdown = (text: string) => {
+  if (!text) return null;
+  
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  
+  lines.forEach((line, lineIndex) => {
+    // Handle bullet points
+    if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) {
+      const content = line.trim().slice(2);
+      elements.push(
+        <div key={lineIndex} className="flex items-start gap-2 ml-2">
+          <span className="text-primary mt-1">•</span>
+          <span>{renderInlineMarkdown(content)}</span>
+        </div>
+      );
+    } else if (line.trim() === '') {
+      elements.push(<div key={lineIndex} className="h-2" />);
+    } else {
+      elements.push(
+        <p key={lineIndex} className="mb-1">{renderInlineMarkdown(line)}</p>
+      );
+    }
+  });
+  
+  return <>{elements}</>;
+};
+
+// Handle inline markdown (bold, italic)
+const renderInlineMarkdown = (text: string): React.ReactNode => {
+  const parts: React.ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+  
+  while (remaining.length > 0) {
+    // Match **bold**
+    const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+    
+    if (boldMatch && boldMatch.index !== undefined) {
+      // Add text before the match
+      if (boldMatch.index > 0) {
+        parts.push(<span key={key++}>{remaining.slice(0, boldMatch.index)}</span>);
+      }
+      // Add bold text
+      parts.push(<strong key={key++} className="font-semibold">{boldMatch[1]}</strong>);
+      remaining = remaining.slice(boldMatch.index + boldMatch[0].length);
+    } else {
+      // No more matches, add remaining text
+      parts.push(<span key={key++}>{remaining}</span>);
+      break;
+    }
+  }
+  
+  return parts.length > 0 ? <>{parts}</> : text;
+};
+
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -157,12 +214,16 @@ export default function Chatbot() {
                   : "bg-secondary text-secondary-foreground rounded-bl-sm"
               )}
             >
-              {msg.content || (isLoading && i === messages.length - 1 && (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Sto scrivendo...
-                </span>
-              ))}
+              {msg.content ? (
+                msg.role === "assistant" ? renderMarkdown(msg.content) : msg.content
+              ) : (
+                isLoading && i === messages.length - 1 && (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Sto scrivendo...
+                  </span>
+                )
+              )}
             </div>
           ))}
           <div ref={messagesEndRef} />
