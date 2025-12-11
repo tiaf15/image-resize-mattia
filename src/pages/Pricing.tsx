@@ -8,9 +8,9 @@ import { toast } from "sonner";
 
 // Stripe price IDs mapping
 const STRIPE_PLANS = {
-  pro: {
-    priceId: "price_1SVJ9aCLNcN70cUDR3ZTQQcN",
-    productId: "prod_TSDaUK8WFfRvMn",
+  premium: {
+    priceId: "price_1SdA59CLNcN70cUDCSp0ZrCZ",
+    productId: "prod_TaKkm796dS5Oqy",
   },
   agency: {
     priceId: "price_1Sd9r8CLNcN70cUD9vqcmhLZ",
@@ -39,7 +39,7 @@ const plans = [
     highlighted: false,
   },
   {
-    name: "Pro",
+    name: "Premium",
     icon: Crown,
     euroPrice: 19,
     period: "/month",
@@ -142,7 +142,7 @@ export default function Pricing() {
     }
   };
 
-  const handleCheckout = async (planKey: "pro" | "agency") => {
+  const handleCheckout = async (planKey: "premium" | "agency") => {
     if (!user) {
       toast.error("Please login to subscribe");
       return;
@@ -183,7 +183,7 @@ export default function Pricing() {
 
   const getCurrentPlan = () => {
     if (!subscription?.subscribed || !subscription.product_id) return "free";
-    if (subscription.product_id === STRIPE_PLANS.pro.productId) return "pro";
+    if (subscription.product_id === STRIPE_PLANS.premium.productId) return "premium";
     if (subscription.product_id === STRIPE_PLANS.agency.productId) return "agency";
     return "free";
   };
@@ -250,7 +250,7 @@ export default function Pricing() {
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
             {plans.map((plan, index) => {
-              const planKey = plan.name.toLowerCase() as "free" | "pro" | "agency";
+              const planKey = plan.name.toLowerCase() as "free" | "premium" | "agency";
               const isCurrentPlan = currentPlan === planKey;
               const isPaid = planKey !== "free";
 
@@ -315,7 +315,7 @@ export default function Pricing() {
                         variant={plan.highlighted ? "accent" : "outline"}
                         size="lg"
                         className="w-full"
-                        onClick={() => handleCheckout(planKey as "pro" | "agency")}
+                        onClick={() => handleCheckout(planKey as "premium" | "agency")}
                         disabled={loading === planKey || checkingSubscription}
                       >
                         {loading === planKey ? (
