@@ -53,19 +53,18 @@ serve(async (req) => {
     const modelToUse = isHighQuality ? "google/gemini-3-pro-image-preview" : "google/gemini-2.5-flash-image-preview";
 
     console.log(`Starting format generation (${mode} mode, model: ${modelToUse}, CTA: ${cta || 'none'}, CTA Color: ${ctaColor || 'auto'}, Style: ${adsStyle || 'none'}) for: ${selectedFormats.join(", ")}`);
-    const formats: Partial<Record<FormatKey, string>> = {};
-
-    for (const ratio of selectedFormats as FormatKey[]) {
+    
+    // Generate all formats in parallel to avoid timeout
+    const generateFormat = async (ratio: FormatKey): Promise<[FormatKey, string | null]> => {
       const config = formatConfigs[ratio];
       if (!config) {
         console.error(`Unknown format: ${ratio}`);
-        continue;
+        return [ratio, null];
       }
 
       try {
         console.log(`Generating ${ratio} (${config.width}x${config.height}) in ${mode} mode...`);
 
-        // High Quality: detailed, strict prompt for maximum accuracy
         const highQualityPrompt = `CRITICAL INSTRUCTION: Generate a NEW image with EXACTLY ${config.aspectRatio} aspect ratio (${config.width}x${config.height} pixels).
 
 Analyze the reference image carefully. Your task is to recreate this exact scene adapted to a ${config.aspectRatio} format while maintaining:
@@ -80,7 +79,6 @@ STRICT REQUIREMENTS:
 
 Generate a professional-quality ${config.aspectRatio} image now.${styleInstruction}${ctaInstruction}`;
 
-        // Fast Mode: simpler, lighter prompt for speed
         const fastModePrompt = `Create a ${config.aspectRatio} version (${config.width}x${config.height}px) of this image. Keep the main subject centered and extend the background naturally to fit the new format.${styleInstruction}${ctaInstruction}`;
 
         const prompt = isHighQuality ? highQualityPrompt : fastModePrompt;
@@ -109,20 +107,35 @@ Generate a professional-quality ${config.aspectRatio} image now.${styleInstructi
         if (!response.ok) {
           const errorText = await response.text();
           console.error(`Error for ${ratio}:`, errorText);
-          continue;
+          return [ratio, null];
         }
 
         const data = await response.json();
         const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
         if (generatedImageUrl) {
-          formats[ratio] = generatedImageUrl;
           console.log(`${ratio} done successfully`);
+          return [ratio, generatedImageUrl];
         } else {
           console.error(`No image returned for ${ratio}`, JSON.stringify(data));
+          return [ratio, null];
         }
       } catch (e) {
         console.error(`Error ${ratio}:`, e);
+        return [ratio, null];
+      }
+    };
+
+    // Run all generations in parallel
+    const results = await Promise.all(
+      (selectedFormats as FormatKey[]).map(ratio => generateFormat(ratio))
+    );
+
+    // Build formats object from results
+    const formats: Partial<Record<FormatKey, string>> = {};
+    for (const [ratio, url] of results) {
+      if (url) {
+        formats[ratio] = url;
       }
     }
 
