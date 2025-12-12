@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      credit_purchases: {
+        Row: {
+          created_at: string
+          credits_amount: number
+          id: string
+          price_cents: number
+          status: string
+          stripe_payment_intent_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_amount: number
+          id?: string
+          price_cents: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_amount?: number
+          id?: string
+          price_cents?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_transactions: {
+        Row: {
+          action_type: string
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_credits: {
+        Row: {
+          created_at: string
+          credits_remaining: number
+          credits_reset_at: string
+          credits_total: number
+          id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          plan_credits_monthly: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_remaining?: number
+          credits_reset_at?: string
+          credits_total?: number
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          plan_credits_monthly?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_remaining?: number
+          credits_reset_at?: string
+          credits_total?: number
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          plan_credits_monthly?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +115,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      subscription_plan: "free" | "pro" | "creator" | "agency"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +242,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_plan: ["free", "pro", "creator", "agency"],
+    },
   },
 } as const
