@@ -10,19 +10,29 @@ const PLANS = [
     description: "Perfect for trying out",
     euroPrice: 0,
     icon: Zap,
+    credits: "20 credits",
   },
   {
     name: "Pro",
     description: "For professionals",
-    euroPrice: 19,
+    euroPrice: 16.90,
     icon: Crown,
     featured: true,
+    credits: "180 credits",
+  },
+  {
+    name: "Creator",
+    description: "For content creators",
+    euroPrice: 39,
+    icon: Crown,
+    credits: "600 credits",
   },
   {
     name: "Agency",
     description: "For teams & agencies",
-    euroPrice: 49,
+    euroPrice: 89,
     icon: Building2,
+    credits: "2,000 credits",
   },
 ] as const;
 
@@ -41,7 +51,7 @@ const PricingSection = memo(function PricingSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {PLANS.map((plan, index) => {
             const Icon = plan.icon;
             const isFeatured = "featured" in plan && plan.featured;
@@ -63,10 +73,11 @@ const PricingSection = memo(function PricingSection() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-1">{plan.name}</h3>
                 <p className="text-sm text-muted-foreground mb-3">{plan.description}</p>
-                <div className="mb-2">
+                <div className="mb-1">
                   <span className="text-2xl font-bold text-foreground">{formatPrice(plan.euroPrice)}</span>
                   <span className="text-muted-foreground text-sm">/month</span>
                 </div>
+                <p className="text-xs text-muted-foreground">{plan.credits}</p>
               </div>
             );
           })}
