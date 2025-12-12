@@ -49,8 +49,10 @@ serve(async (req) => {
 
     const styleInstruction = adsStyle && adsStyleInstructions[adsStyle] ? adsStyleInstructions[adsStyle] : "";
 
-    // Use gemini-2.0-flash-exp for image generation
-    const modelToUse = "gemini-2.0-flash-exp";
+    // Use different models based on quality mode
+    const modelToUse = mode === "high-quality" 
+      ? "gemini-3-pro-image-preview" 
+      : "gemini-2.5-flash-image";
 
     console.log(`Starting format generation (${mode} mode, model: ${modelToUse}, CTA: ${cta || 'none'}, CTA Color: ${ctaColor || 'auto'}, Style: ${adsStyle || 'none'}) for: ${selectedFormats.join(", ")}`);
     
