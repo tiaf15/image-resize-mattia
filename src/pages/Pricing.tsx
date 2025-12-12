@@ -8,75 +8,107 @@ import { toast } from "sonner";
 
 // Stripe price IDs mapping
 const STRIPE_PLANS = {
-  premium: {
-    priceId: "price_1SdA59CLNcN70cUDCSp0ZrCZ",
-    productId: "prod_TaKkm796dS5Oqy",
+  pro: {
+    priceId: "price_1SdeaWCLNcN70cUD9sSIZwiL",
+    productId: "prod_TaqHbXow8nngJC",
+  },
+  creator: {
+    priceId: "price_1SdeahCLNcN70cUD4DnqUmVJ",
+    productId: "prod_TaqHHgk8h8TQxT",
   },
   agency: {
-    priceId: "price_1Sd9r8CLNcN70cUD9vqcmhLZ",
-    productId: "prod_TaKWCuwXNfEKtJ",
+    priceId: "price_1SdeauCLNcN70cUDDDTNhP0E",
+    productId: "prod_TaqH35LIq27eCG",
   },
 } as const;
+
+type PlanKey = "free" | "pro" | "creator" | "agency";
 
 const plans = [
   {
     name: "Free",
+    key: "free" as PlanKey,
     icon: Zap,
     euroPrice: 0,
     period: "/month",
-    description: "Perfect to get started",
+    description: "Perfect to try out",
+    credits: 20,
     features: [
-      { text: "10 Ads Packs per month", included: true },
+      { text: "20 credits/month", included: true },
+      { text: "Fast mode only", included: true },
       { text: "PNG export only", included: true },
-      { text: "One format per generation", included: true },
-      { text: "Basic support", included: true },
-      { text: "No CTA overlays", included: false },
+      { text: "Basic CTA", included: true },
+      { text: "No HQ generation", included: false },
+      { text: "No HQ Master", included: false },
       { text: "No Ads Styles", included: false },
-      { text: "No Safe Zones", included: false },
-      { text: "No Brand Color Adaptation", included: false },
     ],
     cta: "Get Started",
     highlighted: false,
   },
   {
-    name: "Premium",
+    name: "Pro",
+    key: "pro" as PlanKey,
     icon: Crown,
-    euroPrice: 19,
+    euroPrice: 16.90,
     period: "/month",
-    description: "Best for professionals",
-    badge: "Most Popular",
+    description: "For professionals",
+    badge: "Best Value",
+    credits: 180,
     features: [
-      { text: "150 Ads Packs per month", included: true },
-      { text: "All formats available", included: true },
-      { text: "PNG + JPG + WEBP export", included: true },
-      { text: "CTA overlays", included: true },
-      { text: "Ads Styles", included: true },
-      { text: "Safe Zones", included: true },
+      { text: "180 credits/month", included: true },
+      { text: "HQ generation enabled", included: true },
+      { text: "HQ Master generation", included: true },
+      { text: "PNG + JPG + WebP export", included: true },
+      { text: "Mini batch (up to 3 images)", included: true },
+      { text: "Priority rendering", included: true },
+      { text: "2 Ads Styles included", included: true },
       { text: "Brand color adaptation", included: true },
-      { text: "Faster processing", included: true },
       { text: "No watermark", included: true },
     ],
-    cta: "Get Started",
+    cta: "Upgrade to Pro",
     highlighted: true,
   },
   {
-    name: "Agency",
-    icon: Building2,
-    euroPrice: 49,
+    name: "Creator",
+    key: "creator" as PlanKey,
+    icon: Crown,
+    euroPrice: 39,
     period: "/month",
-    description: "For teams and agencies",
+    description: "For content creators",
+    credits: 600,
     features: [
-      { text: "Unlimited Ads Packs", included: true },
-      { text: "Priority rendering", included: true },
-      { text: "All export formats", included: true },
-      { text: "All CTA features + custom CTA text", included: true },
+      { text: "600 credits/month", included: true },
+      { text: "HQ generation enabled", included: true },
+      { text: "HQ Master generation", included: true },
+      { text: "Batch up to 5 images", included: true },
+      { text: "Medium priority queue", included: true },
+      { text: "All premium features", included: true },
       { text: "All Ads Styles", included: true },
-      { text: "Safe Zones", included: true },
-      { text: "Team access (coming soon)", included: true },
-      { text: "Batch upload (coming soon)", included: true },
-      { text: "Priority support", included: true },
+      { text: "No watermark", included: true },
     ],
-    cta: "Get Started",
+    cta: "Get Creator",
+    highlighted: false,
+  },
+  {
+    name: "Agency",
+    key: "agency" as PlanKey,
+    icon: Building2,
+    euroPrice: 89,
+    period: "/month",
+    description: "For teams & agencies",
+    credits: 2000,
+    features: [
+      { text: "2,000 credits/month", included: true },
+      { text: "HQ generation enabled", included: true },
+      { text: "HQ Master generation", included: true },
+      { text: "Team access (3 users)", included: true },
+      { text: "Batch up to 20 images", included: true },
+      { text: "Priority queue", included: true },
+      { text: "Brand Kit features", included: true },
+      { text: "All premium tools", included: true },
+      { text: "No watermark", included: true },
+    ],
+    cta: "Get Agency",
     highlighted: false,
   },
 ];
@@ -142,7 +174,7 @@ export default function Pricing() {
     }
   };
 
-  const handleCheckout = async (planKey: "premium" | "agency") => {
+  const handleCheckout = async (planKey: "pro" | "creator" | "agency") => {
     if (!user) {
       toast.error("Please login to subscribe");
       return;
@@ -181,9 +213,10 @@ export default function Pricing() {
     }
   };
 
-  const getCurrentPlan = () => {
+  const getCurrentPlan = (): PlanKey => {
     if (!subscription?.subscribed || !subscription.product_id) return "free";
-    if (subscription.product_id === STRIPE_PLANS.premium.productId) return "premium";
+    if (subscription.product_id === STRIPE_PLANS.pro.productId) return "pro";
+    if (subscription.product_id === STRIPE_PLANS.creator.productId) return "creator";
     if (subscription.product_id === STRIPE_PLANS.agency.productId) return "agency";
     return "free";
   };
@@ -248,9 +281,9 @@ export default function Pricing() {
       {/* Pricing Cards */}
       <section className="py-12 px-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {plans.map((plan, index) => {
-              const planKey = plan.name.toLowerCase() as "free" | "premium" | "agency";
+              const planKey = plan.key;
               const isCurrentPlan = currentPlan === planKey;
               const isPaid = planKey !== "free";
 
@@ -315,7 +348,7 @@ export default function Pricing() {
                         variant={plan.highlighted ? "accent" : "outline"}
                         size="lg"
                         className="w-full"
-                        onClick={() => handleCheckout(planKey as "premium" | "agency")}
+                        onClick={() => handleCheckout(planKey as "pro" | "creator" | "agency")}
                         disabled={loading === planKey || checkingSubscription}
                       >
                         {loading === planKey ? (
