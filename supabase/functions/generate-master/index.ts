@@ -18,8 +18,9 @@ serve(async (req) => {
 
     console.log("Generating master image with prompt:", prompt);
 
+    // Use gemini-2.5-flash-image for master image generation (fast mode default)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${googleApiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${googleApiKey}`,
       {
         method: "POST",
         headers: {
