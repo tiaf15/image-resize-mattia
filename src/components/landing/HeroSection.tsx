@@ -36,7 +36,7 @@ const HeroSection = memo(function HeroSection() {
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              Fast AI generation
+              Instant setup
             </span>
           </div>
         </div>
