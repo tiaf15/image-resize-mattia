@@ -7,14 +7,14 @@ import { useCurrency } from "@/hooks/useCurrency";
 const PLANS = [
   {
     name: "Free",
-    description: "Perfect for trying out",
+    description: "Perfect to try out",
     euroPrice: 0,
     icon: Zap,
     credits: "20 credits",
   },
   {
     name: "Pro",
-    description: "For professionals",
+    description: "Best for marketers & creators",
     euroPrice: 16.90,
     icon: Crown,
     featured: true,
@@ -22,7 +22,7 @@ const PLANS = [
   },
   {
     name: "Creator",
-    description: "For content creators",
+    description: "For high-volume content creators",
     euroPrice: 39,
     icon: Crown,
     credits: "600 credits",

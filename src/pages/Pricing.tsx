@@ -39,10 +39,11 @@ const plans = [
       { text: "PNG export only", included: true },
       { text: "Basic CTA", included: true },
       { text: "No HQ generation", included: false },
-      { text: "No HQ Master", included: false },
+      { text: "No HQ Master generation", included: false },
       { text: "No Ads Styles", included: false },
     ],
     cta: "Get Started",
+    currentPlanText: "You are currently on the Free plan.",
     highlighted: false,
   },
   {
@@ -51,7 +52,7 @@ const plans = [
     icon: Crown,
     euroPrice: 16.90,
     period: "/month",
-    description: "For professionals",
+    description: "Best for marketers & creators",
     badge: "Best Value",
     credits: 180,
     features: [
@@ -74,16 +75,18 @@ const plans = [
     icon: Crown,
     euroPrice: 39,
     period: "/month",
-    description: "For content creators",
+    description: "For high-volume content creators",
     credits: 600,
     features: [
       { text: "600 credits/month", included: true },
-      { text: "HQ generation enabled", included: true },
+      { text: "HQ enabled", included: true },
       { text: "HQ Master generation", included: true },
       { text: "Batch up to 5 images", included: true },
       { text: "Medium priority queue", included: true },
       { text: "All premium features", included: true },
       { text: "All Ads Styles", included: true },
+      { text: "Custom CTA text", included: true },
+      { text: "Saved Templates", included: true },
       { text: "No watermark", included: true },
     ],
     cta: "Get Creator",
@@ -106,6 +109,8 @@ const plans = [
       { text: "Priority queue", included: true },
       { text: "Brand Kit features", included: true },
       { text: "All premium tools", included: true },
+      { text: "Priority support", included: true },
+      { text: "Early access to new features", included: true },
       { text: "No watermark", included: true },
     ],
     cta: "Get Agency",
@@ -340,9 +345,16 @@ export default function Pricing() {
 
                   <div className="mt-auto">
                     {isCurrentPlan ? (
-                      <Button variant="outline" size="lg" className="w-full" disabled>
-                        Current Plan
-                      </Button>
+                      <>
+                        <Button variant="outline" size="lg" className="w-full" disabled>
+                          Current Plan
+                        </Button>
+                        {planKey === "free" && (
+                          <p className="text-xs text-muted-foreground mt-2 text-center">
+                            You are currently on the Free plan.
+                          </p>
+                        )}
+                      </>
                     ) : isPaid ? (
                       <Button
                         variant={plan.highlighted ? "accent" : "outline"}
