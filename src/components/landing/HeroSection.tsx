@@ -1,15 +1,14 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const HeroSection = memo(function HeroSection() {
   return (
     <section className="pt-32 pb-20 px-6">
       <div className="container mx-auto max-w-4xl text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 animate-fade-in">
-          <Zap className="w-4 h-4" />
-          Smart Format Generation
+          Visuals, perfectly adapted
         </div>
         
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6 animate-fade-up">
