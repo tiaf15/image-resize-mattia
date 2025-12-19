@@ -68,6 +68,24 @@ serve(async (req) => {
       }
     }
 
+    // Helper function to retry on transient errors
+    const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3): Promise<Response> => {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        const response = await fetch(url, options);
+        
+        // Retry on 503 (overloaded) or 429 (rate limit)
+        if ((response.status === 503 || response.status === 429) && attempt < maxRetries) {
+          const delay = attempt * 2000; // 2s, 4s, 6s
+          console.log(`API returned ${response.status}, retrying in ${delay}ms (attempt ${attempt}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        
+        return response;
+      }
+      throw new Error("Max retries exceeded");
+    };
+
     // Generate all formats in parallel
     const generateFormat = async (ratio: FormatKey): Promise<[FormatKey, string | null]> => {
       const config = formatConfigs[ratio];
@@ -118,7 +136,7 @@ Generate a professional-quality ${config.aspectRatio} image now.${styleInstructi
           },
         };
 
-        const response = await fetch(
+        const response = await fetchWithRetry(
           `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${googleApiKey}`,
           {
             method: "POST",
@@ -126,7 +144,8 @@ Generate a professional-quality ${config.aspectRatio} image now.${styleInstructi
               "Content-Type": "application/json",
             },
             body: JSON.stringify(requestBody),
-          }
+          },
+          3
         );
 
         if (!response.ok) {
